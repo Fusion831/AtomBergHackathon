@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,18 +6,72 @@ datasource db {
   provider = "postgresql"
 }
 
+// ------------------------------------------------------
+// ENUMS
+// ------------------------------------------------------
+
 enum Role {
   ADMIN
   MANAGER
   EMPLOYEE
 }
 
+enum GoalSheetStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  LOCKED
+}
+
+enum GoalStatus {
+  NOT_STARTED
+  ON_TRACK
+  COMPLETED
+}
+
+enum UomType {
+  NUMERIC
+  PERCENTAGE
+  TIMELINE
+  ZERO_BASED
+}
+
+enum CheckInPeriod {
+  Q1
+  Q2
+  Q3
+  Q4_ANNUAL
+}
+
+enum GoalType {
+  INDIVIDUAL
+  SHARED
+  DEPARTMENT
+  ORGANIZATIONAL
+}
+
+// ------------------------------------------------------
+// MODELS
+// ------------------------------------------------------
+
 model Department {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  users     User[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String       @id @default(cuid())
+  name        String       @unique
+  description String?
+  
+  parentId    String?
+  parent      Department?  @relation("DepartmentHierarchy", fields: [parentId], references: [id])
+  children    Department[] @relation("DepartmentHierarchy")
+  
+  users       User[]
+  goals       Goal[]       @relation("DepartmentGoals")
+  
+  deletedAt   DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([parentId])
 }
 
 model User {
@@ -31,73 +80,151 @@ model User {
   passwordHash   String
   name           String
   role           Role         @default(EMPLOYEE)
-  departmentId   String
-  department     Department   @relation(fields: [departmentId], references: [id])
+  
+  departmentId   String?
+  department     Department?  @relation(fields: [departmentId], references: [id])
+  
   managerId      String?
   manager        User?        @relation("UserManager", fields: [managerId], references: [id])
   employees      User[]       @relation("UserManager")
-  managedGoalSheets GoalSheet[] @relation("ManagerSheets")
+  
+  ownedGoals     Goal[]       @relation("GoalOwner")
   goalSheets     GoalSheet[]  @relation("UserSheets")
-  auditLogs      AuditLog[]
+  auditLogs      AuditLog[]   @relation("ActorLogs")
+  
+  deletedAt      DateTime?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
   @@index([email])
-}
-
-model GoalSheet {
-  id          String   @id @default(cuid())
-  title       String
-  year        Int
-  quarter     Int      // 1-4
-  status      String   // DRAFT, SUBMITTED, APPROVED, ARCHIVED
-  userId      String
-  user        User     @relation("UserSheets", fields: [userId], references: [id])
-  managerId   String
-  manager     User     @relation("ManagerSheets", fields: [managerId], references: [id])
-  goals       Goal[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([userId])
+  @@index([departmentId])
   @@index([managerId])
 }
 
+model GoalCycle {
+  id          String      @id @default(cuid())
+  name        String      // e.g., "FY 2026-2027"
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean     @default(false)
+  
+  sheets      GoalSheet[]
+  
+  deletedAt   DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model GoalSheet {
+  id          String          @id @default(cuid())
+  
+  userId      String
+  user        User            @relation("UserSheets", fields: [userId], references: [id])
+  
+  cycleId     String
+  cycle       GoalCycle       @relation(fields: [cycleId], references: [id])
+  
+  status      GoalSheetStatus @default(DRAFT)
+  goals       Goal[]
+  
+  submittedAt DateTime?
+  approvedAt  DateTime?
+  lockedAt    DateTime?
+  
+  deletedAt   DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@unique([userId, cycleId]) 
+  @@index([userId])
+  @@index([cycleId])
+  @@index([status])
+}
+
 model Goal {
-  id          String    @id @default(cuid())
-  title       String
-  description String
-  weight      Int       // 1-100
-  target      String
-  achieved    String?
-  status      String    // PENDING, IN_PROGRESS, COMPLETED
-  sheetId     String
-  sheet       GoalSheet @relation(fields: [sheetId], references: [id])
-  checkIns    CheckIn[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id              String      @id @default(cuid())
+  
+  sheetId         String?
+  sheet           GoalSheet?  @relation(fields: [sheetId], references: [id])
+  
+  title           String
+  description     String?
+  thrustArea      String
+  
+  uomType         UomType
+  targetValue     Float?      // Used for NUMERIC, PERCENTAGE, ZERO_BASED
+  targetDate      DateTime?   // Used for TIMELINE
+  
+  weightage       Int         // 1-100
+  status          GoalStatus  @default(NOT_STARTED)
+  
+  goalType        GoalType    @default(INDIVIDUAL)
+  
+  ownerId         String?
+  owner           User?       @relation("GoalOwner", fields: [ownerId], references: [id])
+  
+  departmentId    String?
+  department      Department? @relation("DepartmentGoals", fields: [departmentId], references: [id])
+  
+  // Shared Goal Logic
+  parentGoalId    String?
+  parentGoal      Goal?       @relation("SharedGoals", fields: [parentGoalId], references: [id])
+  childGoals      Goal[]      @relation("SharedGoals")
+  
+  checkIns        CheckIn[]
+  
+  currentProgress Float?
+  deletedAt       DateTime?
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 
   @@index([sheetId])
+  @@index([parentGoalId])
+  @@index([ownerId])
+  @@index([departmentId])
 }
 
 model CheckIn {
-  id        String   @id @default(cuid())
-  content   String
-  goalId    String
-  goal      Goal     @relation(fields: [goalId], references: [id])
-  createdAt DateTime @default(now())
+  id              String         @id @default(cuid())
+  
+  goalId          String
+  goal            Goal           @relation(fields: [goalId], references: [id])
+  
+  period          CheckInPeriod
+  
+  actualValue     Float?
+  actualDate      DateTime?
+  
+  progressScore   Float?         
+  status          GoalStatus     @default(NOT_STARTED)
+  
+  employeeComment String?
+  managerComment  String?
+  
+  deletedAt       DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@unique([goalId, period]) 
+  @@index([goalId])
 }
 
 model AuditLog {
-  id        String   @id @default(cuid())
-  action    String
-  entity    String
-  entityId  String
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  details   Json?
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  
+  actorId     String
+  actor       User     @relation("ActorLogs", fields: [actorId], references: [id])
+  
+  action      String   
+  entityType  String   
+  entityId    String
+  
+  oldValues   Json?
+  newValues   Json?
+  
+  createdAt   DateTime @default(now())
 
-  @@index([userId])
-  @@index([entityId])
+  @@index([actorId])
+  @@index([entityType, entityId])
 }
