@@ -13,14 +13,20 @@ export function calculateProgressScore(
   switch (uomType) {
     case "NUMERIC":
     case "PERCENTAGE":
-      if (!targetValue || actualValue === null) return 0;
+      if (targetValue === null || targetValue === undefined || actualValue === null) return 0;
       
       let score = 0;
       if (metricDirection === "LOWER_IS_BETTER") {
-        if (actualValue <= 0) return 100; // Perfect score if actual is 0 or less (e.g., 0 errors)
+        if (actualValue <= targetValue) return 100;
+        if (actualValue <= 0 && targetValue >= 0) return 100; // Avoid division by zero if target is 0 but actual is also <= 0
+        if (actualValue === 0) return 0; // If target > 0 and actual is 0, score is 0
         score = (targetValue / actualValue) * 100;
       } else {
-        score = (actualValue / targetValue) * 100;
+        if (targetValue === 0) {
+          score = actualValue >= 0 ? 100 : 0;
+        } else {
+          score = (actualValue / targetValue) * 100;
+        }
       }
       
       return Math.min(Math.max(score, 0), 100); // Cap between 0 and 100

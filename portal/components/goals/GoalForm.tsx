@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { saveGoal } from "@/app/actions/goalActions";
 import { useTransition } from "react";
-import { UomType, MetricDirection } from "@prisma/client";
 import { Users } from "lucide-react";
 
 interface GoalFormProps {
@@ -25,8 +24,8 @@ export function GoalForm({ sheetId, initialData, onSuccess, onCancel }: GoalForm
       title: initialData?.title || "",
       description: initialData?.description || "",
       thrustArea: initialData?.thrustArea || "",
-      uomType: initialData?.uomType || UomType.NUMERIC,
-      metricDirection: initialData?.metricDirection || MetricDirection.HIGHER_IS_BETTER,
+      uomType: initialData?.uomType || "NUMERIC",
+      metricDirection: initialData?.metricDirection || "HIGHER_IS_BETTER",
       targetValue: initialData?.targetValue || null,
       weightage: initialData?.weightage || 10,
     }

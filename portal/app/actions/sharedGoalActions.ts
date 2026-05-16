@@ -79,7 +79,8 @@ export async function assignSharedGoal(parentGoalId: string, employeeIds: string
 
         if (sheet.status !== "DRAFT") {
           // Rule: Can only assign goals if sheet is DRAFT
-          if (sheet.status === "LOCKED" || sheet.status === "APPROVED") continue;
+          // Explicitly reject SUBMITTED, UNDER_REVIEW, APPROVED, and LOCKED.
+          continue;
         }
 
         // Enforce 8 goal limit
