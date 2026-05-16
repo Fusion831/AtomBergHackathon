@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { CycleManagement } from "@/components/admin/CycleManagement";
 import { UnlockModal } from "@/components/admin/UnlockModal";
-import { Users, FileText, Lock, Calendar } from "lucide-react";
+import { Users, FileText, Lock, Calendar, Activity } from "lucide-react";
+import { RecentActivityFeed } from "@/components/audit/RecentActivityFeed";
 
 export default async function AdminGovernancePage() {
   const session = await getServerSession(authOptions);
@@ -73,27 +74,38 @@ export default async function AdminGovernancePage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-lg font-medium text-zinc-100">Goal Sheet Overrides</h2>
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-            {lockedCount === 0 ? (
-              <div className="p-8 text-center text-zinc-500">No locked sheets available to manage.</div>
-            ) : (
-              <div className="divide-y divide-zinc-800/80">
-                {sheets.filter(s => s.status === "LOCKED" || s.status === "APPROVED").map(sheet => (
-                  <div key={sheet.id} className="p-4 flex items-center justify-between hover:bg-zinc-800/30 transition-colors">
-                    <div>
-                      <h4 className="text-zinc-200 font-medium">{sheet.user.name}</h4>
-                      <p className="text-xs text-zinc-500">{sheet.user.email}</p>
+        <div className="lg:col-span-2 space-y-8">
+          <div className="space-y-6">
+            <h2 className="text-lg font-medium text-zinc-100">Goal Sheet Overrides</h2>
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+              {lockedCount === 0 ? (
+                <div className="p-8 text-center text-zinc-500">No locked sheets available to manage.</div>
+              ) : (
+                <div className="divide-y divide-zinc-800/80">
+                  {sheets.filter(s => s.status === "LOCKED" || s.status === "APPROVED").map(sheet => (
+                    <div key={sheet.id} className="p-4 flex items-center justify-between hover:bg-zinc-800/30 transition-colors">
+                      <div>
+                        <h4 className="text-zinc-200 font-medium">{sheet.user.name}</h4>
+                        <p className="text-xs text-zinc-500">{sheet.user.email}</p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-medium rounded">Locked</span>
+                        <UnlockModal sheetId={sheet.id} userName={sheet.user.name} />
+                      </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-medium rounded">Locked</span>
-                      <UnlockModal sheetId={sheet.id} userName={sheet.user.name} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <h2 className="text-lg font-medium text-zinc-100 flex items-center gap-2">
+              <Activity size={20} className="text-zinc-400" /> Platform Activity
+            </h2>
+            <div className="bg-zinc-950 p-6 rounded-xl border border-zinc-800">
+              <RecentActivityFeed limit={15} />
+            </div>
           </div>
         </div>
 
