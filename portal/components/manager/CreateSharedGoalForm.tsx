@@ -11,6 +11,7 @@ export function CreateSharedGoalForm() {
     description: "",
     thrustArea: "Financial",
     uomType: "NUMERIC",
+    metricDirection: "HIGHER_IS_BETTER",
     targetValue: ""
   });
 
@@ -29,6 +30,7 @@ export function CreateSharedGoalForm() {
           description: "",
           thrustArea: "Financial",
           uomType: "NUMERIC",
+          metricDirection: "HIGHER_IS_BETTER",
           targetValue: ""
         });
       } else {
@@ -84,6 +86,17 @@ export function CreateSharedGoalForm() {
             <option value="NUMERIC">Numeric</option>
             <option value="PERCENTAGE">Percentage</option>
             <option value="ZERO_BASED">Zero-Based</option>
+          </select>
+        </div>
+        <div className="col-span-2">
+          <label className="block text-xs font-medium text-zinc-400 mb-1">Metric Direction</label>
+          <select 
+            value={formData.metricDirection}
+            onChange={e => setFormData({...formData, metricDirection: e.target.value})}
+            className="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-blue-500"
+          >
+            <option value="HIGHER_IS_BETTER">Higher is Better (e.g., Revenue)</option>
+            <option value="LOWER_IS_BETTER">Lower is Better (e.g., Error Rate)</option>
           </select>
         </div>
       </div>

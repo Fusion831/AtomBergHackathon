@@ -51,6 +51,11 @@ enum GoalType {
   ORGANIZATIONAL
 }
 
+enum MetricDirection {
+  HIGHER_IS_BETTER
+  LOWER_IS_BETTER
+}
+
 // ------------------------------------------------------
 // MODELS
 // ------------------------------------------------------
@@ -155,6 +160,7 @@ model Goal {
   thrustArea      String
   
   uomType         UomType
+  metricDirection MetricDirection @default(HIGHER_IS_BETTER)
   targetValue     Float?      // Used for NUMERIC, PERCENTAGE, ZERO_BASED
   targetDate      DateTime?   // Used for TIMELINE
   

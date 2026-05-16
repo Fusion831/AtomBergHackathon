@@ -25,6 +25,8 @@ export default async function DashboardLayout({ children }: { children: ReactNod
                   <a href="/manager/review" className="hover:text-zinc-100 transition-colors">Team Reviews</a>
                   <a href="/manager/checkins" className="hover:text-zinc-100 transition-colors">Team Check-ins</a>
                   <a href="/manager/shared-goals" className="hover:text-zinc-100 transition-colors">Shared KPIs</a>
+                  <a href="/directory" className="hover:text-zinc-100 transition-colors">Directory</a>
+                  <a href="/reports" className="hover:text-zinc-100 transition-colors">Reports</a>
                 </>
               )}
               {session.user.role === "ADMIN" && (

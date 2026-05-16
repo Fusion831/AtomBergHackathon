@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { saveGoal } from "@/app/actions/goalActions";
 import { useTransition } from "react";
-import { UomType } from "@prisma/client";
+import { UomType, MetricDirection } from "@prisma/client";
 import { Users } from "lucide-react";
 
 interface GoalFormProps {
@@ -26,6 +26,7 @@ export function GoalForm({ sheetId, initialData, onSuccess, onCancel }: GoalForm
       description: initialData?.description || "",
       thrustArea: initialData?.thrustArea || "",
       uomType: initialData?.uomType || UomType.NUMERIC,
+      metricDirection: initialData?.metricDirection || MetricDirection.HIGHER_IS_BETTER,
       targetValue: initialData?.targetValue || null,
       weightage: initialData?.weightage || 10,
     }
@@ -33,9 +34,6 @@ export function GoalForm({ sheetId, initialData, onSuccess, onCancel }: GoalForm
 
   const onSubmit = (data: GoalInput) => {
     startTransition(async () => {
-      // If it's a shared goal, we only allow updating weightage. 
-      // The backend should also strictly enforce this, but we'll send it down.
-      // We pass the id if it exists so saveGoal knows it's an update.
       const payload = { ...data, id: initialData?.id };
       const res = await saveGoal(payload, sheetId);
       if (res.success) {
@@ -127,8 +125,20 @@ export function GoalForm({ sheetId, initialData, onSuccess, onCancel }: GoalForm
           </select>
         </div>
 
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-zinc-300">Metric Direction</label>
+          <select 
+            {...form.register("metricDirection")}
+            disabled={isShared}
+            className="px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-md text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <option value="HIGHER_IS_BETTER">Higher is Better (e.g., Revenue)</option>
+            <option value="LOWER_IS_BETTER">Lower is Better (e.g., Error Rate)</option>
+          </select>
+        </div>
+
         {uom !== "TIMELINE" && (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 md:col-span-2">
             <label className="text-sm font-medium text-zinc-300">Target Value</label>
             <input 
               type="number" step="any"

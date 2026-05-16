@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { UomType } from "@prisma/client";
+import { UomType, MetricDirection } from "@prisma/client";
 
 export const GoalSchema = z.object({
   id: z.string().optional(),
@@ -7,6 +7,7 @@ export const GoalSchema = z.object({
   description: z.string().optional(),
   thrustArea: z.string().min(2, "Thrust area is required"),
   uomType: z.nativeEnum(UomType),
+  metricDirection: z.nativeEnum(MetricDirection).optional().default("HIGHER_IS_BETTER"),
   targetValue: z.coerce.number().optional().nullable(),
   targetDate: z.coerce.date().optional().nullable(),
   weightage: z.coerce.number()

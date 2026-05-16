@@ -19,6 +19,7 @@ export async function createSharedGoal(data: any) {
           description: data.description,
           thrustArea: data.thrustArea,
           uomType: data.uomType,
+          metricDirection: data.metricDirection || "HIGHER_IS_BETTER",
           targetValue: data.targetValue,
           targetDate: data.targetDate,
           weightage: data.weightage || 0, // Master goal might not need weightage if standalone
@@ -77,10 +78,13 @@ export async function assignSharedGoal(parentGoalId: string, employeeIds: string
         if (!sheet) continue; // Skip if no sheet found for this cycle
 
         if (sheet.status !== "DRAFT") {
-          // Rule: Can only assign goals if sheet is DRAFT (or we force append it and unlock it, but let's assume DRAFT for MVP)
-          // To be safe, skip assigning if not DRAFT or UNDER_REVIEW
+          // Rule: Can only assign goals if sheet is DRAFT
           if (sheet.status === "LOCKED" || sheet.status === "APPROVED") continue;
         }
+
+        // Enforce 8 goal limit
+        const currentGoalCount = await tx.goal.count({ where: { sheetId: sheet.id } });
+        if (currentGoalCount >= 8) continue;
 
         // Check if already assigned
         const existing = await tx.goal.findFirst({
@@ -95,6 +99,7 @@ export async function assignSharedGoal(parentGoalId: string, employeeIds: string
             description: parentGoal.description,
             thrustArea: parentGoal.thrustArea,
             uomType: parentGoal.uomType,
+            metricDirection: parentGoal.metricDirection,
             targetValue: parentGoal.targetValue,
             targetDate: parentGoal.targetDate,
             weightage: 10, // Default minimum weightage, employee must adjust

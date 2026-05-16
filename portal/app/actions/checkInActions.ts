@@ -32,7 +32,14 @@ export async function upsertCheckIn(
       return { success: false, message: "Goal sheet must be locked before checking in." };
     }
 
-    const score = calculateProgressScore(goal.uomType, goal.targetValue, data.actualValue || null, goal.targetDate, data.actualDate || null);
+    const score = calculateProgressScore(
+      goal.uomType, 
+      goal.targetValue, 
+      data.actualValue || null, 
+      goal.targetDate, 
+      data.actualDate || null,
+      goal.metricDirection
+    );
     const status = determineStatus(score);
 
     const result = await prisma.$transaction(async (tx) => {
