@@ -99,10 +99,12 @@ export default async function DirectoryPage({ searchParams }: { searchParams: { 
             </div>
             
             {users.length === 0 ? (
-              <div className="p-12 text-center">
-                <Search size={32} className="mx-auto text-zinc-600 mb-3" />
-                <h3 className="text-zinc-300 font-medium">No employees found</h3>
-                <p className="text-zinc-500 text-sm mt-1">Try adjusting your search query or filters.</p>
+              <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+                <div className="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center mb-4 text-zinc-500">
+                  <Search size={20} />
+                </div>
+                <h3 className="text-lg font-medium text-zinc-200">No employees found</h3>
+                <p className="text-sm text-zinc-500 mt-2 max-w-md">Try adjusting your search query or removing some filters to find who you're looking for.</p>
               </div>
             ) : (
               <div className="divide-y divide-zinc-800/80">

@@ -49,9 +49,12 @@ export default async function SharedGoalsPage() {
           <h2 className="text-lg font-medium text-zinc-100">Your Shared Goals</h2>
           
           {masterGoals.length === 0 ? (
-            <div className="text-center py-12 bg-zinc-900/20 border border-zinc-800 border-dashed rounded-xl">
-              <h3 className="text-zinc-300 font-medium">No shared goals created</h3>
-              <p className="text-zinc-500 text-sm mt-1">Create your first departmental KPI using the form.</p>
+            <div className="flex flex-col items-center justify-center py-16 px-6 text-center border border-zinc-800/80 rounded-2xl bg-zinc-950/50 shadow-sm">
+              <div className="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center mb-4 text-zinc-500">
+                <Target size={20} />
+              </div>
+              <h3 className="text-lg font-medium text-zinc-200">No Shared KPIs</h3>
+              <p className="text-sm text-zinc-500 mt-2 max-w-md">Create your first departmental KPI using the form. Once created, you can cascade it to your direct reports.</p>
             </div>
           ) : (
             masterGoals.map((goal) => (

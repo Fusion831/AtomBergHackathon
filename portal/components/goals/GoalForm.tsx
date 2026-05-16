@@ -111,44 +111,49 @@ export function GoalForm({ sheetId, initialData, onSuccess, onCancel }: GoalForm
           {form.formState.errors.weightage && <span className="text-xs text-rose-400">{form.formState.errors.weightage.message}</span>}
         </div>
 
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-zinc-300">Unit of Measure (UoM)</label>
-          <select 
-            {...form.register("uomType")}
-            disabled={isShared}
-            className="px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-md text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <option value="NUMERIC">Numeric</option>
-            <option value="PERCENTAGE">Percentage</option>
-            <option value="TIMELINE">Timeline / Date</option>
-            <option value="ZERO_BASED">Zero-Based (Defect rate)</option>
-          </select>
-        </div>
+        <div className="md:col-span-2 mt-4 pt-4 border-t border-zinc-800/80">
+          <h3 className="text-sm font-medium text-zinc-100 mb-4">Measurement Configuration</h3>
+          <div className="grid gap-4 md:grid-cols-2 p-4 bg-zinc-900/50 rounded-xl border border-zinc-800/50">
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-medium text-zinc-400">Unit of Measure (UoM)</label>
+              <select 
+                {...form.register("uomType")}
+                disabled={isShared}
+                className="px-3 py-2 bg-zinc-900 border border-zinc-700/50 rounded-md text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value="NUMERIC">Numeric</option>
+                <option value="PERCENTAGE">Percentage</option>
+                <option value="TIMELINE">Timeline / Date</option>
+                <option value="ZERO_BASED">Zero-Based (Defect rate)</option>
+              </select>
+            </div>
 
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-zinc-300">Metric Direction</label>
-          <select 
-            {...form.register("metricDirection")}
-            disabled={isShared}
-            className="px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-md text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <option value="HIGHER_IS_BETTER">Higher is Better (e.g., Revenue)</option>
-            <option value="LOWER_IS_BETTER">Lower is Better (e.g., Error Rate)</option>
-          </select>
-        </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-medium text-zinc-400">Metric Direction</label>
+              <select 
+                {...form.register("metricDirection")}
+                disabled={isShared}
+                className="px-3 py-2 bg-zinc-900 border border-zinc-700/50 rounded-md text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value="HIGHER_IS_BETTER">Higher is Better (e.g., Revenue)</option>
+                <option value="LOWER_IS_BETTER">Lower is Better (e.g., Error Rate)</option>
+              </select>
+            </div>
 
-        {uom !== "TIMELINE" && (
-          <div className="flex flex-col gap-2 md:col-span-2">
-            <label className="text-sm font-medium text-zinc-300">Target Value</label>
-            <input 
-              type="number" step="any"
-              {...form.register("targetValue")}
-              disabled={isShared}
-              className="px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-md text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-              placeholder="Target amount..." 
-            />
+            {uom !== "TIMELINE" && (
+              <div className="flex flex-col gap-2 md:col-span-2">
+                <label className="text-xs font-medium text-zinc-400">Target Value</label>
+                <input 
+                  type="number" step="any"
+                  {...form.register("targetValue")}
+                  disabled={isShared}
+                  className="px-3 py-2 bg-zinc-900 border border-zinc-700/50 rounded-md text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed" 
+                  placeholder="Target amount..." 
+                />
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-zinc-800">
