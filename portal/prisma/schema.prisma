@@ -1,0 +1,103 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+model Department {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  users     User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id             String       @id @default(cuid())
+  email          String       @unique
+  passwordHash   String
+  name           String
+  role           Role         @default(EMPLOYEE)
+  departmentId   String
+  department     Department   @relation(fields: [departmentId], references: [id])
+  managerId      String?
+  manager        User?        @relation("UserManager", fields: [managerId], references: [id])
+  employees      User[]       @relation("UserManager")
+  managedGoalSheets GoalSheet[] @relation("ManagerSheets")
+  goalSheets     GoalSheet[]  @relation("UserSheets")
+  auditLogs      AuditLog[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([email])
+}
+
+model GoalSheet {
+  id          String   @id @default(cuid())
+  title       String
+  year        Int
+  quarter     Int      // 1-4
+  status      String   // DRAFT, SUBMITTED, APPROVED, ARCHIVED
+  userId      String
+  user        User     @relation("UserSheets", fields: [userId], references: [id])
+  managerId   String
+  manager     User     @relation("ManagerSheets", fields: [managerId], references: [id])
+  goals       Goal[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([managerId])
+}
+
+model Goal {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  weight      Int       // 1-100
+  target      String
+  achieved    String?
+  status      String    // PENDING, IN_PROGRESS, COMPLETED
+  sheetId     String
+  sheet       GoalSheet @relation(fields: [sheetId], references: [id])
+  checkIns    CheckIn[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([sheetId])
+}
+
+model CheckIn {
+  id        String   @id @default(cuid())
+  content   String
+  goalId    String
+  goal      Goal     @relation(fields: [goalId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  entity    String
+  entityId  String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  details   Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entityId])
+}
