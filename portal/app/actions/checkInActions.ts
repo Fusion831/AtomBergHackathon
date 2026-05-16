@@ -35,7 +35,13 @@ export async function upsertCheckIn(
     const score = calculateProgressScore(goal.uomType, goal.targetValue, data.actualValue || null, goal.targetDate, data.actualDate || null);
     const status = determineStatus(score);
 
-    await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
+      // Enforce active window
+      const activeCycle = await tx.goalCycle.findFirst({ where: { isActive: true } });
+      if (!activeCycle || activeCycle.activeQuarter !== period) {
+        return { success: false, message: "Check-in window is currently closed for this period." };
+      }
+
       // 1. Update the parent check-in
       const existingCheckIn = await tx.checkIn.findUnique({
         where: { goalId_period: { goalId, period } }
@@ -141,7 +147,11 @@ export async function upsertCheckIn(
           });
         }
       }
+
+      return { success: true };
     });
+
+    if (!result.success) return result;
 
     revalidatePath("/checkins");
     revalidatePath("/manager/checkins");

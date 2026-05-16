@@ -16,7 +16,8 @@ export default async function ManagerCheckInDetailPage({ params }: { params: { i
   }
 
   const sheetId = params.id;
-  const activePeriod: CheckInPeriod = "Q1";
+  const activeCycle = await prisma.goalCycle.findFirst({ where: { isActive: true } });
+  const activePeriod = activeCycle?.activeQuarter;
 
   const sheet = await prisma.goalSheet.findUnique({
     where: { id: sheetId },
@@ -52,7 +53,9 @@ export default async function ManagerCheckInDetailPage({ params }: { params: { i
           <ChevronLeft size={16} className="mr-1" /> Back to Team Check-ins
         </Link>
         <div className="px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-md">
-          <span className="text-sm font-medium text-blue-400">{activePeriod} Review</span>
+          <span className="text-sm font-medium text-blue-400">
+            {activePeriod ? `${activePeriod} Review` : "Check-ins Closed"}
+          </span>
         </div>
       </div>
 
@@ -67,11 +70,18 @@ export default async function ManagerCheckInDetailPage({ params }: { params: { i
         </div>
       </div>
 
-      <div className="space-y-4 mb-8">
-        {sheet.goals.map((goal) => (
-          <ManagerCheckInCard key={goal.id} goal={goal} activePeriod={activePeriod} />
-        ))}
-      </div>
+      {!activePeriod ? (
+        <div className="text-center py-12 bg-zinc-900/20 border border-zinc-800 border-dashed rounded-xl">
+          <h3 className="text-zinc-300 font-medium">Check-in window is closed</h3>
+          <p className="text-zinc-500 text-sm mt-1">Check-ins cannot be reviewed until an admin opens a new quarter window.</p>
+        </div>
+      ) : (
+        <div className="space-y-4 mb-8">
+          {sheet.goals.map((goal) => (
+            <ManagerCheckInCard key={goal.id} goal={goal} activePeriod={activePeriod} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -76,6 +76,7 @@ model Department {
 
 model User {
   id             String       @id @default(cuid())
+  empId          String?      @unique
   email          String       @unique
   passwordHash   String
   name           String
@@ -97,22 +98,24 @@ model User {
   updatedAt      DateTime     @updatedAt
 
   @@index([email])
+  @@index([empId])
   @@index([departmentId])
   @@index([managerId])
 }
 
 model GoalCycle {
-  id          String      @id @default(cuid())
-  name        String      // e.g., "FY 2026-2027"
-  startDate   DateTime
-  endDate     DateTime
-  isActive    Boolean     @default(false)
+  id            String          @id @default(cuid())
+  name          String          // e.g., "FY 2026-2027"
+  startDate     DateTime
+  endDate       DateTime
+  isActive      Boolean         @default(false)
+  activeQuarter CheckInPeriod?  // If null, check-in window is closed
   
-  sheets      GoalSheet[]
+  sheets        GoalSheet[]
   
-  deletedAt   DateTime?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  deletedAt     DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 }
 
 model GoalSheet {

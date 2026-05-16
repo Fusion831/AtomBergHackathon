@@ -14,12 +14,13 @@ export default async function ManagerCheckInsListPage() {
     redirect("/dashboard");
   }
 
-  // Active period assumption for MVP
-  const activePeriod: CheckInPeriod = "Q1";
+  const activeCycle = await prisma.goalCycle.findFirst({ where: { isActive: true } });
+  const activePeriod = activeCycle?.activeQuarter;
 
   // Fetch only LOCKED sheets (since check-ins only happen on locked goals)
   const sheets = await prisma.goalSheet.findMany({
     where: {
+      cycleId: activeCycle?.id,
       user: {
         managerId: session.user.role === "MANAGER" ? session.user.id : undefined,
       },
@@ -42,7 +43,9 @@ export default async function ManagerCheckInsListPage() {
           <p className="text-sm text-zinc-400 mt-1">Review progress updates and provide feedback to your team.</p>
         </div>
         <div className="px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-md">
-          <span className="text-sm font-medium text-blue-400">Active Window: {activePeriod}</span>
+          <span className="text-sm font-medium text-blue-400">
+            {activePeriod ? `Active Window: ${activePeriod}` : "Check-ins Closed"}
+          </span>
         </div>
       </div>
 
@@ -51,6 +54,11 @@ export default async function ManagerCheckInsListPage() {
           <div className="text-center py-12 bg-zinc-900/20 border border-zinc-800 border-dashed rounded-xl">
             <h3 className="text-zinc-300 font-medium">No active check-ins</h3>
             <p className="text-zinc-500 text-sm mt-1">There are no approved (locked) goal sheets for your team yet.</p>
+          </div>
+        ) : !activePeriod ? (
+          <div className="text-center py-12 bg-zinc-900/20 border border-zinc-800 border-dashed rounded-xl">
+            <h3 className="text-zinc-300 font-medium">Check-in window is closed</h3>
+            <p className="text-zinc-500 text-sm mt-1">Check-ins cannot be reviewed until an admin opens a new quarter window.</p>
           </div>
         ) : (
           sheets.map((sheet) => {

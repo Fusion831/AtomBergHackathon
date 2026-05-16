@@ -27,6 +27,9 @@ export default async function DashboardLayout({ children }: { children: ReactNod
                   <a href="/manager/shared-goals" className="hover:text-zinc-100 transition-colors">Shared KPIs</a>
                 </>
               )}
+              {session.user.role === "ADMIN" && (
+                <a href="/admin/governance" className="hover:text-zinc-100 transition-colors text-amber-500/80 hover:text-amber-400">Admin</a>
+              )}
             </nav>
           </div>
           <div className="flex items-center gap-4">

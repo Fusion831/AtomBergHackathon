@@ -9,10 +9,13 @@ export default async function EmployeeCheckInsPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect("/login");
 
-  // Fetch the locked goal sheet for the user
+  const activeCycle = await prisma.goalCycle.findFirst({ where: { isActive: true } });
+  const activePeriod = activeCycle?.activeQuarter;
+
   const sheet = await prisma.goalSheet.findFirst({
     where: {
       userId: session.user.id,
+      cycleId: activeCycle?.id,
       status: "LOCKED",
     },
     include: {
@@ -22,9 +25,6 @@ export default async function EmployeeCheckInsPage() {
     }
   });
 
-  // For the MVP, hardcode or detect the active period. Let's assume Q1.
-  const activePeriod: CheckInPeriod = "Q1";
-
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
       <div className="mb-8 border-b border-zinc-800 pb-6 flex items-center justify-between">
@@ -33,7 +33,9 @@ export default async function EmployeeCheckInsPage() {
           <p className="text-sm text-zinc-400 mt-1">Update your progress and achievements for the current period.</p>
         </div>
         <div className="px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-md">
-          <span className="text-sm font-medium text-blue-400">Active Window: {activePeriod}</span>
+          <span className="text-sm font-medium text-blue-400">
+            {activePeriod ? `Active Window: ${activePeriod}` : "Check-ins Closed"}
+          </span>
         </div>
       </div>
 
@@ -41,6 +43,11 @@ export default async function EmployeeCheckInsPage() {
         <div className="flex flex-col items-center justify-center p-12 text-center border border-dashed border-zinc-800 rounded-xl bg-zinc-900/20">
           <h3 className="text-lg font-medium text-zinc-300">No Locked Goals Available</h3>
           <p className="text-sm text-zinc-500 mt-2 max-w-md">Your goals must be approved and locked by your manager before you can enter the check-in phase.</p>
+        </div>
+      ) : !activePeriod ? (
+        <div className="flex flex-col items-center justify-center p-12 text-center border border-dashed border-zinc-800 rounded-xl bg-zinc-900/20">
+          <h3 className="text-lg font-medium text-zinc-300">Check-ins are closed</h3>
+          <p className="text-sm text-zinc-500 mt-2 max-w-md">The system is currently in the Goal Setting phase or between check-in windows.</p>
         </div>
       ) : (
         <div className="space-y-6">
