@@ -143,6 +143,9 @@ model GoalSheet {
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
+  unlockRequested Boolean @default(false)
+  unlockReason    String?
+
   @@unique([userId, cycleId]) 
   @@index([userId])
   @@index([cycleId])

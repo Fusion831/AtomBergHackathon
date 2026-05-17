@@ -10,7 +10,7 @@ import { CheckInPeriod } from "@prisma/client";
 export async function upsertCheckIn(
   goalId: string, 
   period: CheckInPeriod, 
-  data: { actualValue?: number; actualDate?: Date; employeeComment?: string }
+  data: { actualValue?: number; actualDate?: Date; employeeComment?: string; statusOverride?: any }
 ) {
   const session = await getServerSession(authOptions);
   if (!session) return { success: false, message: "Unauthorized" };
@@ -40,7 +40,7 @@ export async function upsertCheckIn(
       data.actualDate || null,
       goal.metricDirection
     );
-    const status = determineStatus(score);
+    const status = data.statusOverride || determineStatus(score);
 
     const result = await prisma.$transaction(async (tx) => {
       // Enforce active window

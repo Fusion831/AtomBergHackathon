@@ -42,7 +42,7 @@ export default async function DraftGoalsPage() {
       userId: session.user.id,
       status: "DRAFT",
     },
-    include: { goals: true }
+    include: { goals: { include: { checkIns: true } } }
   });
 
   // If no draft, find any sheet in the active cycle (submitted, approved, locked, etc.)
@@ -52,10 +52,12 @@ export default async function DraftGoalsPage() {
         userId: session.user.id,
         status: { in: ["SUBMITTED", "UNDER_REVIEW", "APPROVED", "LOCKED"] },
       },
-      include: { goals: true },
+      include: { goals: { include: { checkIns: true } } },
       orderBy: { updatedAt: "desc" }
     });
   }
+
+  const activeCycle = await prisma.goalCycle.findFirst({ where: { isActive: true } });
 
   const isDraft = sheet?.status === "DRAFT";
   const statusInfo = sheet && !isDraft ? STATUS_CONFIG[sheet.status] : null;
@@ -93,7 +95,7 @@ export default async function DraftGoalsPage() {
       )}
 
       {sheet ? (
-        <GoalSheetManager sheet={sheet} />
+        <GoalSheetManager sheet={sheet as any} activePeriod={activeCycle?.activeQuarter || undefined} />
       ) : (
         <div className="flex flex-col items-center justify-center py-16 px-6 text-center border border-zinc-800/80 rounded-2xl bg-zinc-950/50 shadow-sm">
           <div className="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center mb-4 text-zinc-500">

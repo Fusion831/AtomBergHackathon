@@ -2,19 +2,23 @@
 
 import { GoalSheet, Goal } from "@prisma/client";
 import { useTransition, useState } from "react";
-import { submitGoalSheet } from "@/app/actions/sheetActions";
+import { submitGoalSheet, requestUnlock } from "@/app/actions/sheetActions";
 import { WeightageProgress } from "@/components/goals/WeightageProgress";
 import { GoalForm } from "@/components/goals/GoalForm";
 import { GoalList } from "@/components/goals/GoalList";
-import { Plus, AlertTriangle } from "lucide-react";
+import { Plus, AlertTriangle, Unlock } from "lucide-react";
+import { CheckInCard } from "@/components/checkins/CheckInCard";
+import { CheckInPeriod } from "@prisma/client";
 
-type SheetWithGoals = GoalSheet & { goals: Goal[] };
+type SheetWithGoals = GoalSheet & { goals: any[] };
 
-export function GoalSheetManager({ sheet }: { sheet: SheetWithGoals }) {
+export function GoalSheetManager({ sheet, activePeriod }: { sheet: SheetWithGoals; activePeriod?: CheckInPeriod }) {
   const [isPending, startTransition] = useTransition();
   const [showForm, setShowForm] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [showUnlockModal, setShowUnlockModal] = useState(false);
+  const [unlockReason, setUnlockReason] = useState("");
 
   const currentWeightage = sheet.goals.reduce((acc, g) => acc + g.weightage, 0);
   const isReadyToSubmit = currentWeightage === 100 && sheet.goals.length > 0 && sheet.goals.length <= 8;
@@ -35,6 +39,21 @@ export function GoalSheetManager({ sheet }: { sheet: SheetWithGoals }) {
     setShowForm(true);
   };
 
+  const handleRequestUnlock = () => {
+    if (!unlockReason.trim()) {
+      alert("Please provide a reason for the unlock request.");
+      return;
+    }
+    startTransition(async () => {
+      const res = await requestUnlock(sheet.id, unlockReason);
+      if (res.success) {
+        setShowUnlockModal(false);
+      } else {
+        alert(res.message);
+      }
+    });
+  };
+
   if (sheet.status !== "DRAFT") {
     return (
       <div className="space-y-6">
@@ -42,7 +61,20 @@ export function GoalSheetManager({ sheet }: { sheet: SheetWithGoals }) {
         <div>
           <h2 className="text-lg font-medium text-zinc-100 mb-4">Your Goals ({sheet.goals.length})</h2>
           <div className="flex flex-col gap-3">
-            {sheet.goals.map((goal) => (
+            {sheet.goals.map((goal) => {
+              if (sheet.status === "LOCKED" && activePeriod) {
+                return (
+                  <div key={goal.id} className="relative">
+                    {goal.goalType === "SHARED" && (
+                      <div className="absolute -top-3 right-4 z-20">
+                        <span className="px-2 py-0.5 bg-blue-500 text-white text-[10px] uppercase tracking-wider font-semibold rounded shadow-sm">Shared KPI</span>
+                      </div>
+                    )}
+                    <CheckInCard goal={goal} activePeriod={activePeriod} />
+                  </div>
+                );
+              }
+              return (
               <div key={goal.id} className={`flex flex-col gap-4 p-5 bg-zinc-900/40 border ${goal.goalType === "SHARED" ? 'border-blue-500/30' : 'border-zinc-800'} rounded-xl relative overflow-hidden`}>
                 {goal.goalType === "SHARED" && (
                   <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
@@ -56,7 +88,7 @@ export function GoalSheetManager({ sheet }: { sheet: SheetWithGoals }) {
                     </div>
                   )}
                   <h4 className="text-base font-medium text-zinc-100">{goal.title}</h4>
-                  <p className="text-sm text-zinc-400 line-clamp-2">{goal.description || "No description provided."}</p>
+                  {goal.description && <p className="text-sm text-zinc-400">{goal.description}</p>}
                 </div>
                 <div className="flex flex-wrap items-center gap-4 pt-3 border-t border-zinc-800/50 relative z-10">
                   <div className="flex items-center gap-1.5 text-xs font-medium text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-md">
@@ -70,8 +102,60 @@ export function GoalSheetManager({ sheet }: { sheet: SheetWithGoals }) {
                   </div>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
+          
+          {sheet.status === "LOCKED" && !sheet.unlockRequested && !showUnlockModal && (
+            <div className="mt-8 flex justify-end">
+              <button
+                onClick={() => setShowUnlockModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-amber-600/10 text-amber-500 hover:bg-amber-600/20 border border-amber-600/20 rounded-md transition-colors font-medium text-sm"
+              >
+                <Unlock size={16} /> Request Unlock
+              </button>
+            </div>
+          )}
+
+          {sheet.status === "LOCKED" && sheet.unlockRequested && (
+            <div className="mt-8 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-3">
+              <Unlock className="text-amber-500 mt-0.5" size={20} />
+              <div>
+                <h4 className="text-amber-500 font-medium">Unlock Requested</h4>
+                <p className="text-sm text-zinc-400 mt-1">You have requested the Admin to unlock this sheet. Reason: "{sheet.unlockReason}"</p>
+              </div>
+            </div>
+          )}
+
+          {showUnlockModal && (
+            <div className="mt-8 p-5 bg-zinc-900 border border-zinc-800 rounded-xl">
+              <h3 className="text-lg font-medium text-zinc-100 mb-2">Request Admin Unlock</h3>
+              <p className="text-sm text-zinc-400 mb-4">
+                Since this sheet is fully approved and locked, any changes require Administrator approval. Please provide a clear business justification for why these goals need to be modified mid-cycle.
+              </p>
+              <textarea
+                value={unlockReason}
+                onChange={(e) => setUnlockReason(e.target.value)}
+                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500 h-24 resize-none mb-4"
+                placeholder="Reason for requesting unlock..."
+              />
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowUnlockModal(false)}
+                  disabled={isPending}
+                  className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-zinc-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleRequestUnlock}
+                  disabled={isPending || !unlockReason.trim()}
+                  className="px-4 py-2 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white text-sm font-medium rounded-md transition-colors"
+                >
+                  {isPending ? "Submitting..." : "Submit Request"}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );

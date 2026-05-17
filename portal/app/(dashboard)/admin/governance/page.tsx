@@ -85,8 +85,16 @@ export default async function AdminGovernancePage() {
                   {sheets.filter(s => s.status === "LOCKED" || s.status === "APPROVED").map(sheet => (
                     <div key={sheet.id} className="p-4 flex items-center justify-between hover:bg-zinc-800/30 transition-colors">
                       <div>
-                        <h4 className="text-zinc-200 font-medium">{sheet.user.name}</h4>
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-zinc-200 font-medium">{sheet.user.name}</h4>
+                          {sheet.unlockRequested && (
+                            <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 text-[10px] font-semibold uppercase tracking-wider rounded">Unlock Requested</span>
+                          )}
+                        </div>
                         <p className="text-xs text-zinc-500">{sheet.user.email}</p>
+                        {sheet.unlockRequested && (
+                          <p className="text-xs text-amber-400/80 mt-1 italic max-w-md">Reason: "{sheet.unlockReason}"</p>
+                        )}
                       </div>
                       <div className="flex items-center gap-4">
                         <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-medium rounded">Locked</span>

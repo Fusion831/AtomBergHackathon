@@ -13,12 +13,14 @@ export function CheckInCard({ goal, activePeriod }: { goal: GoalWithCheckIns; ac
   
   const [actualValue, setActualValue] = useState(currentCheckIn?.actualValue?.toString() || "");
   const [employeeComment, setEmployeeComment] = useState(currentCheckIn?.employeeComment || "");
+  const [statusOverride, setStatusOverride] = useState<string>(currentCheckIn?.status || "");
 
   const handleSave = () => {
     startTransition(async () => {
       const res = await upsertCheckIn(goal.id, activePeriod, {
         actualValue: actualValue ? parseFloat(actualValue) : undefined,
-        employeeComment: employeeComment || undefined
+        employeeComment: employeeComment || undefined,
+        statusOverride: statusOverride || undefined
       });
       if (!res.success) {
         alert(res.message);
@@ -27,7 +29,8 @@ export function CheckInCard({ goal, activePeriod }: { goal: GoalWithCheckIns; ac
   };
 
   const hasChanges = actualValue !== (currentCheckIn?.actualValue?.toString() || "") ||
-                     employeeComment !== (currentCheckIn?.employeeComment || "");
+                     employeeComment !== (currentCheckIn?.employeeComment || "") ||
+                     statusOverride !== (currentCheckIn?.status || "");
 
   return (
     <div className="p-5 bg-zinc-900 border border-zinc-800 rounded-xl space-y-4">
@@ -72,6 +75,16 @@ export function CheckInCard({ goal, activePeriod }: { goal: GoalWithCheckIns; ac
               onChange={(e) => setActualValue(e.target.value)}
               className="flex-1 bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-blue-500"
             />
+            <select
+              value={statusOverride}
+              onChange={(e) => setStatusOverride(e.target.value)}
+              className="w-40 bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-blue-500"
+            >
+              <option value="">Auto-calculate</option>
+              <option value="NOT_STARTED">Not Started</option>
+              <option value="ON_TRACK">On Track</option>
+              <option value="COMPLETED">Completed</option>
+            </select>
           </div>
         </div>
 

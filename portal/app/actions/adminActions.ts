@@ -30,7 +30,9 @@ export async function unlockGoalSheet(sheetId: string, reason: string) {
         data: { 
           status: "DRAFT",
           lockedAt: null,
-          approvedAt: null
+          approvedAt: null,
+          unlockRequested: false,
+          unlockReason: null
         }
       });
 

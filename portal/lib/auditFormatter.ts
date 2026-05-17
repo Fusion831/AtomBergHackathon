@@ -22,6 +22,8 @@ export function formatAuditAction(action: string, entityType: string, newValues:
       return { text: "requested revisions on the Goal Sheet", icon: XCircle, color: "text-rose-400 bg-rose-500/10" };
     case "ADMIN_UNLOCK_SHEET":
       return { text: `unlocked Goal Sheet (Override: ${newValues?.reason || "No reason"})`, icon: Unlock, color: "text-amber-400 bg-amber-500/10" };
+    case "REQUEST_UNLOCK":
+      return { text: `requested an unlock for their Goal Sheet: "${newValues?.reason || "No reason"}"`, icon: Unlock, color: "text-amber-400 bg-amber-500/10" };
     case "CREATE_CYCLE":
       return { text: `created goal cycle "${newValues?.name}"`, icon: Settings, color: "text-zinc-400 bg-zinc-500/10" };
     case "SET_ACTIVE_CYCLE":
