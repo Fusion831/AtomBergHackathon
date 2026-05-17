@@ -133,6 +133,7 @@ model GoalSheet {
   cycleId     String
   cycle       GoalCycle       @relation(fields: [cycleId], references: [id])
   
+  quarter     CheckInPeriod
   status      GoalSheetStatus @default(DRAFT)
   goals       Goal[]
   
@@ -147,7 +148,7 @@ model GoalSheet {
   unlockRequested Boolean @default(false)
   unlockReason    String?
 
-  @@unique([userId, cycleId]) 
+  @@unique([userId, cycleId, quarter]) 
   @@index([userId])
   @@index([cycleId])
   @@index([status])

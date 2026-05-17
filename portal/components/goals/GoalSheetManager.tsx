@@ -12,7 +12,15 @@ import { CheckInPeriod } from "@prisma/client";
 
 type SheetWithGoals = GoalSheet & { goals: any[] };
 
-export function GoalSheetManager({ sheet, activePeriod }: { sheet: SheetWithGoals; activePeriod?: CheckInPeriod }) {
+export function GoalSheetManager({ 
+  sheet, 
+  activePeriod, 
+  planningPeriod 
+}: { 
+  sheet: SheetWithGoals; 
+  activePeriod?: CheckInPeriod; 
+  planningPeriod?: CheckInPeriod; 
+}) {
   const [isPending, startTransition] = useTransition();
   const [showForm, setShowForm] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
@@ -110,10 +118,35 @@ export function GoalSheetManager({ sheet, activePeriod }: { sheet: SheetWithGoal
             )})}
           </div>
           
-          {sheet.status === "LOCKED" && !sheet.unlockRequested && !showUnlockModal && (
+          {sheet.status === "LOCKED" && planningPeriod && !sheet.unlockRequested && !showUnlockModal && (
+            <div className="mt-8 p-5 bg-amber-500/5 border border-amber-500/20 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h4 className="text-amber-400 font-semibold flex items-center gap-1.5 text-sm">
+                  <Unlock size={16} /> {planningPeriod} Goal Planning Window is Open
+                </h4>
+                <p className="text-xs text-zinc-400 mt-1 max-w-xl">
+                  You can prepare or adjust your targets/weights for the upcoming cycle phase. Request an executive override unlock from your administrator to edit this locked sheet for planning.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setUnlockReason(`Adjusting targets/weightages for the upcoming ${planningPeriod} planning period.`);
+                  setShowUnlockModal(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-md transition-colors font-semibold text-xs shrink-0 shadow-md"
+              >
+                <Unlock size={14} /> Unlock for Planning
+              </button>
+            </div>
+          )}
+
+          {sheet.status === "LOCKED" && !planningPeriod && !sheet.unlockRequested && !showUnlockModal && (
             <div className="mt-8 flex justify-end">
               <button
-                onClick={() => setShowUnlockModal(true)}
+                onClick={() => {
+                  setUnlockReason("");
+                  setShowUnlockModal(true);
+                }}
                 className="flex items-center gap-2 px-4 py-2 bg-amber-600/10 text-amber-500 hover:bg-amber-600/20 border border-amber-600/20 rounded-md transition-colors font-medium text-sm"
               >
                 <Unlock size={16} /> Request Unlock

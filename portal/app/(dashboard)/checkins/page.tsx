@@ -22,7 +22,8 @@ export default async function EmployeeCheckInsPage({ searchParams }: { searchPar
     where: {
       userId: session.user.id,
       cycleId: activeCycle?.id,
-      status: "LOCKED",
+      quarter: selectedPeriod,
+      status: { in: ["APPROVED", "LOCKED"] },
     },
     include: {
       goals: {

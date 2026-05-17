@@ -32,6 +32,8 @@ export function formatAuditAction(action: string, entityType: string, newValues:
       return { text: "activated a goal cycle", icon: Play, color: "text-emerald-400 bg-emerald-500/10" };
     case "SET_ACTIVE_QUARTER":
       return { text: `opened check-in window for ${newValues?.activeQuarter || "Goal Setting"}`, icon: Target, color: "text-blue-400 bg-blue-500/10" };
+    case "SET_PLANNING_QUARTER":
+      return { text: `opened goal planning window for ${newValues?.planningQuarter || "Goal Setting"}`, icon: Target, color: "text-amber-400 bg-amber-500/10" };
     case "CREATE_SHARED_GOAL":
       return { text: `created shared KPI "${newValues?.title}"`, icon: Target, color: "text-indigo-400 bg-indigo-500/10" };
     case "ASSIGN_SHARED_GOAL":

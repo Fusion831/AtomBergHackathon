@@ -25,10 +25,11 @@ export default async function ManagerCheckInsListPage({ searchParams }: { search
   const sheets = await prisma.goalSheet.findMany({
     where: {
       cycleId: activeCycle?.id,
+      quarter: selectedPeriod,
       user: {
         managerId: session.user.role === "MANAGER" ? session.user.id : undefined,
       },
-      status: "LOCKED",
+      status: { in: ["APPROVED", "LOCKED"] },
     },
     include: {
       user: true,

@@ -2,7 +2,7 @@
 
 import { GoalCycle } from "@prisma/client";
 import { useState, useTransition } from "react";
-import { createGoalCycle, setActiveCycle, setActiveQuarter } from "@/app/actions/adminActions";
+import { createGoalCycle, setActiveCycle, setActiveQuarter, setPlanningQuarter } from "@/app/actions/adminActions";
 import { Settings, Play, CheckCircle } from "lucide-react";
 
 export function CycleManagement({ cycles, activeCycle }: { cycles: GoalCycle[], activeCycle?: GoalCycle }) {
@@ -42,6 +42,13 @@ export function CycleManagement({ cycles, activeCycle }: { cycles: GoalCycle[], 
     if (!activeCycle) return;
     startTransition(async () => {
       await setActiveQuarter(activeCycle.id, quarter as any);
+    });
+  };
+
+  const handleSetPlanningQuarter = (quarter: string | null) => {
+    if (!activeCycle) return;
+    startTransition(async () => {
+      await setPlanningQuarter(activeCycle.id, quarter as any);
     });
   };
 
@@ -119,6 +126,23 @@ export function CycleManagement({ cycles, activeCycle }: { cycles: GoalCycle[], 
               <option value="Q4_ANNUAL">Q4 / Annual Review</option>
             </select>
             <p className="text-xs text-blue-400/60 mt-2">Changing this will instantly open or close the check-in window across the organization.</p>
+          </div>
+
+          <div className="pt-3 border-t border-blue-500/20">
+            <label className="block text-xs font-medium text-blue-400/80 mb-2 uppercase tracking-wider">Active Planning Window</label>
+            <select 
+              value={(activeCycle as any).planningQuarter || ""}
+              onChange={(e) => handleSetPlanningQuarter(e.target.value || null)}
+              disabled={isPending}
+              className="w-full bg-zinc-950 border border-blue-500/30 rounded-md px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-blue-500"
+            >
+              <option value="">No Active Planning (Planning Closed)</option>
+              <option value="Q1">Q1 Goal Planning</option>
+              <option value="Q2">Q2 Goal Planning</option>
+              <option value="Q3">Q3 Goal Planning</option>
+              <option value="Q4_ANNUAL">Q4 / Annual Planning</option>
+            </select>
+            <p className="text-xs text-blue-400/60 mt-2">Changing this allows employees to simultaneously plan/adjust goals for the selected quarter.</p>
           </div>
         </div>
       )}

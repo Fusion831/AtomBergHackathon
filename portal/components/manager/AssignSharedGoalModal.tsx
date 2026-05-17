@@ -9,12 +9,14 @@ export function AssignSharedGoalModal({
   goalId, 
   teamMembers, 
   assignedIds,
-  cycleId 
+  cycleId,
+  quarter
 }: { 
   goalId: string; 
   teamMembers: User[]; 
   assignedIds: string[];
   cycleId: string;
+  quarter: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -33,7 +35,7 @@ export function AssignSharedGoalModal({
     if (selectedIds.size === 0) return;
     
     startTransition(async () => {
-      const res = await assignSharedGoal(goalId, Array.from(selectedIds), cycleId);
+      const res = await assignSharedGoal(goalId, Array.from(selectedIds), cycleId, quarter);
       if (res.success) {
         setIsOpen(false);
         setSelectedIds(new Set());

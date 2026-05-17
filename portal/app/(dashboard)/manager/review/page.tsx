@@ -59,7 +59,10 @@ export default async function ManagerReviewPage() {
                 <Link key={sheet.id} href={`/manager/review/${sheet.id}`}>
                   <div className="flex items-center justify-between p-5 bg-zinc-900 hover:bg-zinc-800/80 border border-zinc-800 hover:border-zinc-700 transition-colors rounded-xl group cursor-pointer">
                     <div>
-                      <h3 className="text-zinc-100 font-medium">{sheet.user.name}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-zinc-100 font-medium">{sheet.user.name}</h3>
+                        <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded uppercase tracking-wider">{sheet.quarter}</span>
+                      </div>
                       <p className="text-sm text-zinc-400 mt-0.5">{sheet.goals.length} goals submitted</p>
                     </div>
                     <div className="flex items-center gap-4">
@@ -83,7 +86,10 @@ export default async function ManagerReviewPage() {
                 <Link key={sheet.id} href={`/manager/review/${sheet.id}`}>
                   <div className="flex items-center justify-between p-4 bg-zinc-950 hover:bg-zinc-900/80 border border-zinc-800/50 hover:border-zinc-700 rounded-xl transition-colors group cursor-pointer">
                     <div>
-                      <h3 className="text-zinc-300 font-medium">{sheet.user.name}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-zinc-300 font-medium">{sheet.user.name}</h3>
+                        <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded uppercase tracking-wider">{sheet.quarter}</span>
+                      </div>
                       <p className="text-xs text-zinc-500 mt-0.5">{sheet.goals.length} goals approved</p>
                     </div>
                     <div className="flex items-center gap-4">
@@ -104,7 +110,10 @@ export default async function ManagerReviewPage() {
               {draftSheets.map(sheet => (
                 <div key={sheet.id} className="flex items-center justify-between p-4 bg-zinc-950 border border-zinc-800/50 rounded-xl">
                   <div>
-                    <h3 className="text-zinc-300 font-medium">{sheet.user.name}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-zinc-300 font-medium">{sheet.user.name}</h3>
+                      <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-zinc-800 border border-zinc-700 text-zinc-400 rounded uppercase tracking-wider">{sheet.quarter}</span>
+                    </div>
                     <p className="text-xs text-zinc-500 mt-0.5">{sheet.goals.length} goals drafted so far</p>
                   </div>
                   <span className="px-2.5 py-1 text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">

@@ -63,6 +63,32 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           </div>
         </div>
       </header>
+      {activeCycle && (activeQuarter || activeCycle.planningQuarter) && (
+        <div className="bg-zinc-950 border-b border-zinc-800/80 px-6 py-2">
+          <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 text-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              {activeQuarter && (
+                <div className="flex items-center gap-1.5 text-blue-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                  <span><strong>{activeQuarter} Performance Tracking</strong> is currently active.</span>
+                </div>
+              )}
+              {activeQuarter && activeCycle.planningQuarter && (
+                <span className="hidden sm:inline text-zinc-800">|</span>
+              )}
+              {activeCycle.planningQuarter && (
+                <div className="flex items-center gap-1.5 text-amber-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                  <span><strong>{activeCycle.planningQuarter} Goal Planning</strong> is now open.</span>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] text-zinc-500 font-semibold tracking-wider bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 uppercase">Dual-Phase Overlap</span>
+            </div>
+          </div>
+        </div>
+      )}
       <main className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-6 lg:p-8 space-y-6">
         {children}
       </main>

@@ -44,6 +44,31 @@ export default async function SharedGoalsPage() {
         <p className="text-sm text-zinc-400 mt-1">Create departmental goals and assign them across your team. Progress updates will cascade automatically.</p>
       </div>
 
+      {activeCycle && (activeCycle.activeQuarter || (activeCycle as any).planningQuarter) && (
+        <div className="mb-6 p-4 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-500/10 text-blue-400 rounded-lg">
+              <Target size={20} />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-zinc-200">Active Cycle: {activeCycle.name}</p>
+              <div className="flex items-center gap-2 mt-1 text-xs text-zinc-400">
+                {activeCycle.activeQuarter && (
+                  <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-blue-500"></span>{activeCycle.activeQuarter} Performance Active</span>
+                )}
+                {activeCycle.activeQuarter && (activeCycle as any).planningQuarter && <span className="text-zinc-700">|</span>}
+                {(activeCycle as any).planningQuarter && (
+                  <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-amber-500"></span>{(activeCycle as any).planningQuarter} Planning Open</span>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="text-xs text-zinc-400 max-w-xs text-right hidden md:block">
+            Pro Tip: Ensure team members have a <strong>Draft</strong> or <strong>Unlocked</strong> sheet to accept new shared KPI assignments.
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           <h2 className="text-lg font-medium text-zinc-100">Your Shared Goals</h2>

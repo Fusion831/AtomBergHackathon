@@ -169,3 +169,40 @@ export async function setActiveQuarter(cycleId: string, quarter: CheckInPeriod |
     return { success: false, message: "Error setting active quarter." };
   }
 }
+
+export async function setPlanningQuarter(cycleId: string, quarter: CheckInPeriod | null) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== "ADMIN") {
+    return { success: false, message: "Unauthorized" };
+  }
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      const cycle = await tx.goalCycle.findUnique({ where: { id: cycleId } });
+      
+      await tx.goalCycle.update({
+        where: { id: cycleId },
+        data: { planningQuarter: quarter }
+      });
+
+      await tx.auditLog.create({
+        data: {
+          actorId: session.user.id,
+          action: "SET_PLANNING_QUARTER",
+          entityType: "GoalCycle",
+          entityId: cycleId,
+          oldValues: { planningQuarter: cycle?.planningQuarter },
+          newValues: { planningQuarter: quarter }
+        }
+      });
+    });
+
+    revalidatePath("/admin/governance");
+    revalidatePath("/checkins");
+    revalidatePath("/manager/checkins");
+    revalidatePath("/goals/draft");
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: "Error setting planning quarter." };
+  }
+}

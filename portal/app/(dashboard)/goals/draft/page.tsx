@@ -36,28 +36,31 @@ export default async function DraftGoalsPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect("/login");
 
-  // First, try to find a DRAFT sheet the user can still edit
+  const activeCycle = await prisma.goalCycle.findFirst({ where: { isActive: true } });
+  const targetQuarter = activeCycle?.planningQuarter || activeCycle?.activeQuarter || "Q2";
+
+  // Find the exact sheet for this quarter
   let sheet = await prisma.goalSheet.findFirst({
     where: {
       userId: session.user.id,
-      status: "DRAFT",
+      cycleId: activeCycle?.id,
+      quarter: targetQuarter,
     },
     include: { goals: { include: { checkIns: true } } }
   });
 
-  // If no draft, find any sheet in the active cycle (submitted, approved, locked, etc.)
-  if (!sheet) {
-    sheet = await prisma.goalSheet.findFirst({
-      where: {
+  // Auto-instantiate a DRAFT sheet if none exists and the planning window is open
+  if (!sheet && activeCycle && activeCycle.planningQuarter === targetQuarter) {
+    sheet = await prisma.goalSheet.create({
+      data: {
         userId: session.user.id,
-        status: { in: ["SUBMITTED", "UNDER_REVIEW", "APPROVED", "LOCKED"] },
+        cycleId: activeCycle.id,
+        quarter: targetQuarter,
+        status: "DRAFT",
       },
-      include: { goals: { include: { checkIns: true } } },
-      orderBy: { updatedAt: "desc" }
+      include: { goals: { include: { checkIns: true } } }
     });
   }
-
-  const activeCycle = await prisma.goalCycle.findFirst({ where: { isActive: true } });
 
   const isDraft = sheet?.status === "DRAFT";
   const statusInfo = sheet && !isDraft ? STATUS_CONFIG[sheet.status] : null;
@@ -95,7 +98,11 @@ export default async function DraftGoalsPage() {
       )}
 
       {sheet ? (
-        <GoalSheetManager sheet={sheet as any} activePeriod={activeCycle?.activeQuarter || undefined} />
+        <GoalSheetManager 
+          sheet={sheet as any} 
+          activePeriod={activeCycle?.activeQuarter || undefined} 
+          planningPeriod={activeCycle?.planningQuarter || undefined} 
+        />
       ) : (
         <div className="flex flex-col items-center justify-center py-16 px-6 text-center border border-zinc-800/80 rounded-2xl bg-zinc-950/50 shadow-sm">
           <div className="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center mb-4 text-zinc-500">

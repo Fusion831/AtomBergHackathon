@@ -52,7 +52,7 @@ export async function createSharedGoal(data: any) {
   }
 }
 
-export async function assignSharedGoal(parentGoalId: string, employeeIds: string[], cycleId: string) {
+export async function assignSharedGoal(parentGoalId: string, employeeIds: string[], cycleId: string, quarter: any) {
   const session = await getServerSession(authOptions);
   if (!session || (session.user.role !== "MANAGER" && session.user.role !== "ADMIN")) {
     return { success: false, message: "Unauthorized" };
@@ -72,7 +72,7 @@ export async function assignSharedGoal(parentGoalId: string, employeeIds: string
       for (const empId of employeeIds) {
         // Find their active DRAFT sheet for the cycle
         const sheet = await tx.goalSheet.findUnique({
-          where: { userId_cycleId: { userId: empId, cycleId } }
+          where: { userId_cycleId_quarter: { userId: empId, cycleId, quarter } }
         });
 
         if (!sheet) continue; // Skip if no sheet found for this cycle
