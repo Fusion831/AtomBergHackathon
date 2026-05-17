@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth/authOptions";
 import { redirect } from "next/navigation";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { Target } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const session = await getServerSession(authOptions);
@@ -11,6 +12,9 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   if (!session) {
     redirect("/login");
   }
+
+  const activeCycle = await prisma.goalCycle.findFirst({ where: { isActive: true } });
+  const activeQuarter = activeCycle?.activeQuarter;
 
   return (
     <div className="min-h-screen bg-black text-slate-50 flex flex-col font-sans selection:bg-blue-500/30">
@@ -21,7 +25,16 @@ export default async function DashboardLayout({ children }: { children: ReactNod
               <div className="p-1.5 bg-blue-500/10 rounded-lg border border-blue-500/20">
                 <Target size={18} className="text-blue-400" />
               </div>
-              <h1 className="text-lg font-semibold tracking-tight text-zinc-100">AtomQuest</h1>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <h1 className="text-lg font-semibold tracking-tight text-zinc-100">AtomQuest</h1>
+                <span className={`px-2 py-0.5 text-[10px] font-semibold tracking-wider rounded uppercase border ${
+                  activeQuarter 
+                    ? "bg-blue-500/10 text-blue-400 border-blue-500/20" 
+                    : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                }`}>
+                  {activeQuarter ? `Active Phase: ${activeQuarter}` : "Phase: Goal Setting"}
+                </span>
+              </div>
             </div>
             <nav className="hidden md:flex items-center gap-5 text-sm font-medium text-zinc-400">
               {session.user.role !== "ADMIN" && (

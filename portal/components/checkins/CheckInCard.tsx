@@ -7,7 +7,7 @@ import { Save, MessageSquare } from "lucide-react";
 
 type GoalWithCheckIns = Goal & { checkIns: CheckIn[] };
 
-export function CheckInCard({ goal, activePeriod }: { goal: GoalWithCheckIns; activePeriod: CheckInPeriod }) {
+export function CheckInCard({ goal, activePeriod, readOnly }: { goal: GoalWithCheckIns; activePeriod: CheckInPeriod; readOnly?: boolean }) {
   const [isPending, startTransition] = useTransition();
   const currentCheckIn = goal.checkIns.find((c) => c.period === activePeriod);
   
@@ -65,58 +65,95 @@ export function CheckInCard({ goal, activePeriod }: { goal: GoalWithCheckIns; ac
       </div>
 
       <div className="space-y-4 pt-2">
-        <div className="space-y-2">
-          <label className="text-xs text-zinc-400 font-medium uppercase tracking-wider">Update Actual Achievement</label>
-          <div className="flex gap-2">
-            <input 
-              type="number"
-              placeholder={`Enter actual ${goal.uomType.toLowerCase()}`}
-              value={actualValue}
-              onChange={(e) => setActualValue(e.target.value)}
-              className="flex-1 bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-blue-500"
-            />
-            <select
-              value={statusOverride}
-              onChange={(e) => setStatusOverride(e.target.value)}
-              className="w-40 bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-blue-500"
-            >
-              <option value="">Auto-calculate</option>
-              <option value="NOT_STARTED">Not Started</option>
-              <option value="ON_TRACK">On Track</option>
-              <option value="COMPLETED">Completed</option>
-            </select>
-          </div>
-        </div>
+        {readOnly ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-800/80">
+                <span className="block text-[10px] font-semibold uppercase tracking-wider text-zinc-500 mb-1">Actual Achievement</span>
+                <p className="text-sm font-medium text-zinc-200">
+                  {currentCheckIn?.actualValue !== undefined && currentCheckIn?.actualValue !== null 
+                    ? `${currentCheckIn.actualValue}${goal.uomType === "PERCENTAGE" ? "%" : ""}`
+                    : "No actual logged yet"
+                  }
+                </p>
+              </div>
+              <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-800/80">
+                <span className="block text-[10px] font-semibold uppercase tracking-wider text-zinc-500 mb-1">Status Mode</span>
+                <p className="text-sm font-medium text-zinc-200">
+                  {currentCheckIn ? (currentCheckIn.status ? "Manual Override" : "Auto-calculated") : "Not Started"}
+                </p>
+              </div>
+            </div>
 
-        <div className="space-y-2">
-          <label className="text-xs text-zinc-400 font-medium uppercase tracking-wider">Your Comments</label>
-          <textarea 
-            placeholder="Describe what you achieved, blockers, or help needed..."
-            value={employeeComment}
-            onChange={(e) => setEmployeeComment(e.target.value)}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-100 min-h-[80px] resize-y focus:outline-none focus:border-blue-500"
-          />
-        </div>
+            <div className="space-y-1">
+              <span className="block text-[10px] font-semibold uppercase tracking-wider text-zinc-500 mb-1">Your Comments</span>
+              {currentCheckIn?.employeeComment ? (
+                <p className="text-sm text-zinc-300 p-3 bg-zinc-950 rounded-md border border-zinc-800/60 leading-relaxed">
+                  {currentCheckIn.employeeComment}
+                </p>
+              ) : (
+                <p className="text-xs text-zinc-500 italic p-3 bg-zinc-950 rounded-md border border-zinc-850">No employee comments logged.</p>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="space-y-2">
+              <label className="text-xs text-zinc-400 font-medium uppercase tracking-wider">Update Actual Achievement</label>
+              <div className="flex gap-2">
+                <input 
+                  type="number"
+                  placeholder={`Enter actual ${goal.uomType.toLowerCase()}`}
+                  value={actualValue}
+                  onChange={(e) => setActualValue(e.target.value)}
+                  className="flex-1 bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-blue-500"
+                />
+                <select
+                  value={statusOverride}
+                  onChange={(e) => setStatusOverride(e.target.value)}
+                  className="w-40 bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-blue-500"
+                >
+                  <option value="">Auto-calculate</option>
+                  <option value="NOT_STARTED">Not Started</option>
+                  <option value="ON_TRACK">On Track</option>
+                  <option value="COMPLETED">Completed</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs text-zinc-400 font-medium uppercase tracking-wider">Your Comments</label>
+              <textarea 
+                placeholder="Describe what you achieved, blockers, or help needed..."
+                value={employeeComment}
+                onChange={(e) => setEmployeeComment(e.target.value)}
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-100 min-h-[80px] resize-y focus:outline-none focus:border-blue-500"
+              />
+            </div>
+          </>
+        )}
 
         {currentCheckIn?.managerComment && (
-          <div className="flex items-start gap-2 text-sm text-blue-400 bg-blue-500/10 px-3 py-2 rounded-md border border-blue-500/20">
+          <div className="flex items-start gap-2.5 text-sm text-blue-400 bg-blue-500/10 px-3 py-3 rounded-md border border-blue-500/20">
             <MessageSquare size={16} className="mt-0.5 shrink-0" />
             <div>
-              <span className="block text-xs font-medium uppercase tracking-wider mb-0.5 opacity-80">Manager Feedback</span>
-              <span>{currentCheckIn.managerComment}</span>
+              <span className="block text-xs font-semibold uppercase tracking-wider mb-1 opacity-90">Manager Feedback</span>
+              <p className="text-zinc-300 text-sm leading-relaxed">{currentCheckIn.managerComment}</p>
             </div>
           </div>
         )}
 
-        <div className="flex justify-end pt-2">
-          <button 
-            onClick={handleSave}
-            disabled={!hasChanges || isPending}
-            className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white rounded-md transition-colors flex items-center gap-2 font-medium"
-          >
-            <Save size={16} /> {isPending ? "Saving..." : "Save Check-in"}
-          </button>
-        </div>
+        {!readOnly && (
+          <div className="flex justify-end pt-2">
+            <button 
+              onClick={handleSave}
+              disabled={!hasChanges || isPending}
+              className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white rounded-md transition-colors flex items-center gap-2 font-medium"
+            >
+              <Save size={16} /> {isPending ? "Saving..." : "Save Check-in"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

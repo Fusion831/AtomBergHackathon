@@ -63,7 +63,12 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Pr
       department: true,
       manager: true,
       goalSheets: {
-        where: { cycleId: activeCycle?.id }
+        where: { cycleId: activeCycle?.id },
+        include: {
+          goals: {
+            include: { checkIns: true }
+          }
+        }
       }
     },
     orderBy: { name: "asc" }
@@ -86,10 +91,10 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Pr
       <div className="flex flex-col md:flex-row gap-8">
         <div className="w-full md:w-64 flex-shrink-0">
           <DirectoryFilters 
-            isAdmin={isAdmin} 
-            departments={departments} 
-            managers={managers} 
-            currentParams={resolvedParams} 
+             isAdmin={isAdmin} 
+             departments={departments} 
+             managers={managers} 
+             currentParams={resolvedParams} 
           />
         </div>
 
@@ -115,7 +120,28 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Pr
                   let statusText = "No Goals Drafted";
 
                   if (sheet) {
-                    if (sheet.status === "LOCKED") { statusColor = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"; statusText = "Locked (Active)"; }
+                    if (sheet.status === "LOCKED") {
+                      if (activeCycle?.activeQuarter) {
+                        const totalGoals = sheet.goals.length;
+                        const updatedGoals = sheet.goals.filter(g => g.checkIns.some(c => c.period === activeCycle.activeQuarter)).length;
+                        if (totalGoals === 0) {
+                          statusColor = "bg-zinc-800 text-zinc-400 border border-zinc-750";
+                          statusText = "No Goals Defined";
+                        } else if (updatedGoals === totalGoals) {
+                          statusColor = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                          statusText = `${activeCycle.activeQuarter} Completed`;
+                        } else if (updatedGoals > 0) {
+                          statusColor = "bg-amber-500/10 text-amber-400 border border-amber-500/20";
+                          statusText = `${activeCycle.activeQuarter} (${updatedGoals}/${totalGoals})`;
+                        } else {
+                          statusColor = "bg-rose-500/10 text-rose-400 border border-rose-500/20";
+                          statusText = `${activeCycle.activeQuarter} Pending`;
+                        }
+                      } else {
+                        statusColor = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                        statusText = "Locked (Active)";
+                      }
+                    }
                     else if (sheet.status === "SUBMITTED" || sheet.status === "UNDER_REVIEW") { statusColor = "bg-amber-500/10 text-amber-400 border border-amber-500/20"; statusText = "Pending Approval"; }
                     else if (sheet.status === "DRAFT") { statusColor = "bg-blue-500/10 text-blue-400 border border-blue-500/20"; statusText = "In Draft"; }
                   }

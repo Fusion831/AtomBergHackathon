@@ -115,6 +115,7 @@ model GoalCycle {
   endDate       DateTime
   isActive      Boolean         @default(false)
   activeQuarter CheckInPeriod?  // If null, check-in window is closed
+  planningQuarter CheckInPeriod? // If null, planning window is closed
   
   sheets        GoalSheet[]
   

@@ -7,7 +7,13 @@ import { ChevronLeft } from "lucide-react";
 import { ManagerCheckInCard } from "@/components/checkins/ManagerCheckInCard";
 import { CheckInPeriod } from "@prisma/client";
 
-export default async function ManagerCheckInDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ManagerCheckInDetailPage({ 
+  params, 
+  searchParams 
+}: { 
+  params: Promise<{ id: string }>; 
+  searchParams: Promise<{ period?: string }>;
+}) {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect("/login");
 
@@ -16,8 +22,12 @@ export default async function ManagerCheckInDetailPage({ params }: { params: Pro
   }
 
   const { id: sheetId } = await params;
+  const resolvedParams = await searchParams;
   const activeCycle = await prisma.goalCycle.findFirst({ where: { isActive: true } });
   const activePeriod = activeCycle?.activeQuarter;
+
+  const selectedPeriod = (resolvedParams.period as CheckInPeriod) || activePeriod || "Q1";
+  const isReadOnly = selectedPeriod !== activePeriod;
 
   const sheet = await prisma.goalSheet.findUnique({
     where: { id: sheetId },
@@ -28,7 +38,11 @@ export default async function ManagerCheckInDetailPage({ params }: { params: Pro
       cycle: true,
       goals: {
         orderBy: { weightage: "desc" },
-        include: { checkIns: true }
+        include: { 
+          checkIns: {
+            where: { period: selectedPeriod }
+          }
+        }
       },
     }
   });
@@ -46,16 +60,29 @@ export default async function ManagerCheckInDetailPage({ params }: { params: Pro
     redirect("/manager/checkins");
   }
 
+  const quarters: { id: CheckInPeriod; label: string }[] = [
+    { id: "Q1", label: "Q1 Check-in" },
+    { id: "Q2", label: "Q2 Check-in" },
+    { id: "Q3", label: "Q3 Check-in" },
+    { id: "Q4_ANNUAL", label: "Q4 / Annual" }
+  ];
+
   return (
     <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 pb-24">
-      <div className="mb-6 flex justify-between items-center">
+      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <Link href="/manager/checkins" className="inline-flex items-center text-sm text-zinc-400 hover:text-zinc-200 transition-colors">
           <ChevronLeft size={16} className="mr-1" /> Back to Team Check-ins
         </Link>
-        <div className="px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-md">
-          <span className="text-sm font-medium text-blue-400">
-            {activePeriod ? `${activePeriod} Review` : "Check-ins Closed"}
-          </span>
+        <div className="flex items-center gap-2">
+          {activePeriod ? (
+            <div className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider rounded">
+              Active Window: {activePeriod}
+            </div>
+          ) : (
+            <div className="px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-500 text-xs font-semibold uppercase tracking-wider rounded">
+              Check-ins Closed
+            </div>
+          )}
         </div>
       </div>
 
@@ -70,18 +97,43 @@ export default async function ManagerCheckInDetailPage({ params }: { params: Pro
         </div>
       </div>
 
-      {!activePeriod ? (
-        <div className="text-center py-12 bg-zinc-900/20 border border-zinc-800 border-dashed rounded-xl">
-          <h3 className="text-zinc-300 font-medium">Check-in window is closed</h3>
-          <p className="text-zinc-500 text-sm mt-1">Check-ins cannot be reviewed until an admin opens a new quarter window.</p>
-        </div>
-      ) : (
-        <div className="space-y-4 mb-8">
-          {sheet.goals.map((goal) => (
-            <ManagerCheckInCard key={goal.id} goal={goal} activePeriod={activePeriod} />
-          ))}
-        </div>
-      )}
+      {/* Tabs to traverse quarters easily */}
+      <div className="flex border-b border-zinc-850 gap-4 md:gap-6 mb-8 overflow-x-auto pb-px">
+        {quarters.map((q) => {
+          const isActiveWindow = activePeriod === q.id;
+          const isSelected = selectedPeriod === q.id;
+          
+          return (
+            <Link 
+              key={q.id}
+              href={`/manager/checkins/${sheetId}?period=${q.id}`}
+              className={`pb-3 text-xs md:text-sm font-semibold border-b-2 transition-all whitespace-nowrap flex items-center gap-1.5 shrink-0 ${
+                isSelected 
+                  ? "border-blue-500 text-zinc-100" 
+                  : "border-transparent text-zinc-500 hover:text-zinc-300"
+              }`}
+            >
+              <span>{q.label}</span>
+              {isActiveWindow ? (
+                <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse" title="Active Window"></span>
+              ) : (
+                <span className="text-[10px] text-zinc-600 bg-zinc-900 border border-zinc-800 px-1 rounded uppercase font-normal">Closed</span>
+              )}
+            </Link>
+          );
+        })}
+      </div>
+
+      <div className="space-y-4 mb-8">
+        {sheet.goals.map((goal) => (
+          <ManagerCheckInCard 
+            key={goal.id} 
+            goal={goal} 
+            activePeriod={selectedPeriod} 
+            readOnly={isReadOnly} 
+          />
+        ))}
+      </div>
     </div>
   );
 }

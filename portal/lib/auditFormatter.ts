@@ -17,8 +17,10 @@ export function formatAuditAction(action: string, entityType: string, newValues:
     case "SUBMIT_SHEET":
       return { text: "submitted their Goal Sheet for review", icon: FileText, color: "text-blue-400 bg-blue-500/10" };
     case "MANAGER_APPROVE":
+    case "APPROVE_SHEET":
       return { text: "approved the Goal Sheet", icon: CheckCircle, color: "text-emerald-400 bg-emerald-500/10" };
     case "MANAGER_REJECT":
+    case "REJECT_SHEET":
       return { text: "requested revisions on the Goal Sheet", icon: XCircle, color: "text-rose-400 bg-rose-500/10" };
     case "ADMIN_UNLOCK_SHEET":
       return { text: `unlocked Goal Sheet (Override: ${newValues?.reason || "No reason"})`, icon: Unlock, color: "text-amber-400 bg-amber-500/10" };
