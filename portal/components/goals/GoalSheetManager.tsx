@@ -59,7 +59,12 @@ export function GoalSheetManager({ sheet, activePeriod }: { sheet: SheetWithGoal
       <div className="space-y-6">
         <WeightageProgress current={currentWeightage} />
         <div>
-          <h2 className="text-lg font-medium text-zinc-100 mb-4">Your Goals ({sheet.goals.length})</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-medium text-zinc-100">Your Goals ({sheet.goals.length})</h2>
+            {sheet.status === "LOCKED" && !activePeriod && (
+              <span className="text-xs font-medium bg-zinc-800 text-zinc-400 px-3 py-1 rounded-full border border-zinc-700">Check-in Window Closed</span>
+            )}
+          </div>
           <div className="flex flex-col gap-3">
             {sheet.goals.map((goal) => {
               if (sheet.status === "LOCKED" && activePeriod) {

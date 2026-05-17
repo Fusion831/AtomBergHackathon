@@ -69,7 +69,7 @@ export async function requestUnlock(sheetId: string, reason: string) {
   if (!session) return { success: false, message: "Unauthorized" };
 
   try {
-    const sheet = await prisma.goalSheet.findUnique({
+    const sheet = await prisma.goalSheet.findFirst({
       where: { id: sheetId, userId: session.user.id }
     });
 
@@ -103,6 +103,7 @@ export async function requestUnlock(sheetId: string, reason: string) {
     return { success: true };
     
   } catch (error) {
+    console.error("Error in requestUnlock:", error);
     return { success: false, message: "An error occurred while requesting unlock." };
   }
 }
