@@ -7,7 +7,7 @@ import { ChevronLeft, Lock } from "lucide-react";
 import { GoalReviewCard } from "@/components/manager/GoalReviewCard";
 import { ManagerReviewActions } from "@/components/manager/ManagerReviewActions";
 
-export default async function ManagerReviewDetailPage({ params }: { params: { id: string } }) {
+export default async function ManagerReviewDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect("/login");
 
@@ -15,7 +15,7 @@ export default async function ManagerReviewDetailPage({ params }: { params: { id
     redirect("/dashboard");
   }
 
-  const sheetId = params.id;
+  const { id: sheetId } = await params;
 
   const sheet = await prisma.goalSheet.findUnique({
     where: { id: sheetId },

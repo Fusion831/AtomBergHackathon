@@ -24,8 +24,12 @@ export default async function DashboardLayout({ children }: { children: ReactNod
               <h1 className="text-lg font-semibold tracking-tight text-zinc-100">AtomQuest</h1>
             </div>
             <nav className="hidden md:flex items-center gap-5 text-sm font-medium text-zinc-400">
-              <a href="/goals/draft" className="hover:text-zinc-100 transition-colors">My Goals</a>
-              <a href="/checkins" className="hover:text-zinc-100 transition-colors">Check-ins</a>
+              {session.user.role !== "ADMIN" && (
+                <>
+                  <a href="/goals/draft" className="hover:text-zinc-100 transition-colors">My Goals</a>
+                  <a href="/checkins" className="hover:text-zinc-100 transition-colors">Check-ins</a>
+                </>
+              )}
               {(session.user.role === "MANAGER" || session.user.role === "ADMIN") && (
                 <>
                   <a href="/manager/review" className="hover:text-zinc-100 transition-colors">Team Reviews</a>

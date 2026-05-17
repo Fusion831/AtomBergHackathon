@@ -7,7 +7,7 @@ import { ChevronLeft } from "lucide-react";
 import { ManagerCheckInCard } from "@/components/checkins/ManagerCheckInCard";
 import { CheckInPeriod } from "@prisma/client";
 
-export default async function ManagerCheckInDetailPage({ params }: { params: { id: string } }) {
+export default async function ManagerCheckInDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect("/login");
 
@@ -15,7 +15,7 @@ export default async function ManagerCheckInDetailPage({ params }: { params: { i
     redirect("/dashboard");
   }
 
-  const sheetId = params.id;
+  const { id: sheetId } = await params;
   const activeCycle = await prisma.goalCycle.findFirst({ where: { isActive: true } });
   const activePeriod = activeCycle?.activeQuarter;
 

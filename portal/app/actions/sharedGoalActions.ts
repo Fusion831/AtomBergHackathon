@@ -37,7 +37,7 @@ export async function createSharedGoal(data: any) {
           action: "CREATE_SHARED_GOAL",
           entityType: "Goal",
           entityId: newGoal.id,
-          oldValues: null,
+          oldValues: {},
           newValues: { title: newGoal.title, targetValue: newGoal.targetValue }
         }
       });
@@ -117,7 +117,7 @@ export async function assignSharedGoal(parentGoalId: string, employeeIds: string
             action: "ASSIGN_SHARED_GOAL",
             entityType: "Goal",
             entityId: childGoal.id,
-            oldValues: null,
+            oldValues: {},
             newValues: { parentGoalId: parentGoal.id, employeeId: empId }
           }
         });

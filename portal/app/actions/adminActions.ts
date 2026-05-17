@@ -79,7 +79,7 @@ export async function createGoalCycle(name: string, startDate: Date, endDate: Da
           action: "CREATE_CYCLE",
           entityType: "GoalCycle",
           entityId: cycle.id,
-          oldValues: null,
+          oldValues: {},
           newValues: { name, startDate, endDate }
         }
       });
@@ -118,7 +118,7 @@ export async function setActiveCycle(cycleId: string) {
           action: "SET_ACTIVE_CYCLE",
           entityType: "GoalCycle",
           entityId: cycleId,
-          oldValues: null,
+          oldValues: {},
           newValues: { isActive: true }
         }
       });

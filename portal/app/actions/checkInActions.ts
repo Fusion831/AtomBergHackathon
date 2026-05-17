@@ -95,7 +95,7 @@ export async function upsertCheckIn(
             action: "CREATE_CHECKIN",
             entityType: "CheckIn",
             entityId: newCheckIn.id,
-            oldValues: null,
+            oldValues: {},
             newValues: { actualValue: data.actualValue, score }
           }
         });
@@ -148,7 +148,7 @@ export async function upsertCheckIn(
               action: "PROPAGATE_CHECKIN",
               entityType: "Goal",
               entityId: child.id,
-              oldValues: null,
+              oldValues: {},
               newValues: { actualValue: data.actualValue, score }
             }
           });

@@ -6,12 +6,13 @@ import Link from "next/link";
 import { Search, Filter, ChevronRight, User as UserIcon } from "lucide-react";
 import { DirectoryFilters } from "@/components/directory/DirectoryFilters";
 
-export default async function DirectoryPage({ searchParams }: { searchParams: { q?: string; status?: string; departmentId?: string; managerId?: string } }) {
+export default async function DirectoryPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string; departmentId?: string; managerId?: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session?.user || (session.user.role !== "ADMIN" && session.user.role !== "MANAGER")) {
     redirect("/dashboard");
   }
 
+  const resolvedParams = await searchParams;
   const isAdmin = session.user.role === "ADMIN";
   const activeCycle = await prisma.goalCycle.findFirst({ where: { isActive: true } });
 
@@ -22,24 +23,24 @@ export default async function DirectoryPage({ searchParams }: { searchParams: { 
     whereClause.managerId = session.user.id;
   }
 
-  if (searchParams.q) {
+  if (resolvedParams.q) {
     whereClause.OR = [
-      { name: { contains: searchParams.q, mode: "insensitive" } },
-      { email: { contains: searchParams.q, mode: "insensitive" } },
-      { empId: { contains: searchParams.q, mode: "insensitive" } }
+      { name: { contains: resolvedParams.q, mode: "insensitive" } },
+      { email: { contains: resolvedParams.q, mode: "insensitive" } },
+      { empId: { contains: resolvedParams.q, mode: "insensitive" } }
     ];
   }
 
-  if (isAdmin && searchParams.departmentId) {
-    whereClause.departmentId = searchParams.departmentId;
+  if (isAdmin && resolvedParams.departmentId) {
+    whereClause.departmentId = resolvedParams.departmentId;
   }
 
-  if (isAdmin && searchParams.managerId) {
-    whereClause.managerId = searchParams.managerId;
+  if (isAdmin && resolvedParams.managerId) {
+    whereClause.managerId = resolvedParams.managerId;
   }
 
-  if (searchParams.status && activeCycle) {
-    if (searchParams.status === "PENDING_APPROVAL") {
+  if (resolvedParams.status && activeCycle) {
+    if (resolvedParams.status === "PENDING_APPROVAL") {
       whereClause.goalSheets = {
         some: {
           cycleId: activeCycle.id,
@@ -50,7 +51,7 @@ export default async function DirectoryPage({ searchParams }: { searchParams: { 
       whereClause.goalSheets = {
         some: {
           cycleId: activeCycle.id,
-          status: searchParams.status
+          status: resolvedParams.status
         }
       };
     }
@@ -88,7 +89,7 @@ export default async function DirectoryPage({ searchParams }: { searchParams: { 
             isAdmin={isAdmin} 
             departments={departments} 
             managers={managers} 
-            currentParams={searchParams} 
+            currentParams={resolvedParams} 
           />
         </div>
 

@@ -19,7 +19,7 @@ export function GoalForm({ sheetId, initialData, onSuccess, onCancel }: GoalForm
   const isShared = initialData?.goalType === "SHARED";
   
   const form = useForm<GoalInput>({
-    resolver: zodResolver(GoalSchema),
+    resolver: zodResolver(GoalSchema) as any,
     defaultValues: {
       title: initialData?.title || "",
       description: initialData?.description || "",

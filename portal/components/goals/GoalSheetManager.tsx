@@ -97,7 +97,7 @@ export function GoalSheetManager({ sheet }: { sheet: SheetWithGoals }) {
       {showForm ? (
         <GoalForm 
           sheetId={sheet.id} 
-          initialData={editingGoal || undefined} 
+          initialData={(editingGoal as any) || undefined} 
           onSuccess={() => { setShowForm(false); setEditingGoal(null); }}
           onCancel={() => { setShowForm(false); setEditingGoal(null); }}
         />

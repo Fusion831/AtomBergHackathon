@@ -12,7 +12,7 @@ export async function saveGoal(input: GoalInput, sheetId: string) {
 
   const parsed = GoalSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, message: parsed.error.errors[0].message };
+    return { success: false, message: parsed.error.issues[0].message };
   }
 
   const sheet = await prisma.goalSheet.findUnique({
