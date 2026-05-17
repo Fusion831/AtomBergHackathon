@@ -9,6 +9,7 @@ import { GoalList } from "@/components/goals/GoalList";
 import { Plus, AlertTriangle, Unlock } from "lucide-react";
 import { CheckInCard } from "@/components/checkins/CheckInCard";
 import { CheckInPeriod } from "@prisma/client";
+import Link from "next/link";
 
 type SheetWithGoals = GoalSheet & { goals: any[] };
 
@@ -66,6 +67,14 @@ export function GoalSheetManager({
     return (
       <div className="space-y-6">
         <WeightageProgress current={currentWeightage} />
+
+        <div className="flex items-center justify-between p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl">
+          <span className="text-sm font-medium text-zinc-300">
+            Goal Sheet Quarter: <strong className="text-emerald-400">{sheet.quarter}</strong>
+          </span>
+          <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded uppercase tracking-wider">{sheet.status}</span>
+        </div>
+
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-medium text-zinc-100">Your Goals ({sheet.goals.length})</h2>
@@ -118,25 +127,22 @@ export function GoalSheetManager({
             )})}
           </div>
           
-          {sheet.status === "LOCKED" && planningPeriod && !sheet.unlockRequested && !showUnlockModal && (
+          {sheet.status === "LOCKED" && planningPeriod && sheet.quarter !== planningPeriod && !sheet.unlockRequested && !showUnlockModal && (
             <div className="mt-8 p-5 bg-amber-500/5 border border-amber-500/20 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <h4 className="text-amber-400 font-semibold flex items-center gap-1.5 text-sm">
                   <Unlock size={16} /> {planningPeriod} Goal Planning Window is Open
                 </h4>
                 <p className="text-xs text-zinc-400 mt-1 max-w-xl">
-                  You can prepare or adjust your targets/weights for the upcoming cycle phase. Request an executive override unlock from your administrator to edit this locked sheet for planning.
+                  Please use your separate dedicated Goal Planning Workspace (Q3 sheet) to prepare goals for the upcoming cycle phase, keeping this {sheet.quarter} operational sheet locked for check-ins.
                 </p>
               </div>
-              <button
-                onClick={() => {
-                  setUnlockReason(`Adjusting targets/weightages for the upcoming ${planningPeriod} planning period.`);
-                  setShowUnlockModal(true);
-                }}
+              <Link
+                href="/goals/draft"
                 className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-md transition-colors font-semibold text-xs shrink-0 shadow-md"
               >
-                <Unlock size={14} /> Unlock for Planning
-              </button>
+                Go to Planning Workspace &rarr;
+              </Link>
             </div>
           )}
 
@@ -203,6 +209,13 @@ export function GoalSheetManager({
     <div className="space-y-6">
       {/* Real-time Validation UI */}
       <WeightageProgress current={currentWeightage} />
+
+      <div className="flex items-center justify-between p-4 bg-blue-500/5 border border-blue-500/10 rounded-xl">
+        <span className="text-sm font-medium text-zinc-300">
+          Currently Planning Goals for: <strong className="text-blue-400">{sheet.quarter}</strong>
+        </span>
+        <span className="px-2 py-0.5 text-[10px] font-bold bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded uppercase tracking-wider">Planning Open</span>
+      </div>
 
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-medium text-zinc-100">Drafted Goals ({sheet.goals.length}/8)</h2>

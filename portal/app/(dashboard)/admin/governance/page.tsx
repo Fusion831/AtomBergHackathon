@@ -131,6 +131,7 @@ export default async function AdminGovernancePage({ searchParams }: { searchPara
                           <div>
                             <div className="flex items-center gap-2">
                               <h4 className="text-zinc-200 font-medium">{sheet.user.name}</h4>
+                              <span className="px-1.5 py-0.5 text-[9px] font-semibold bg-zinc-800 border border-zinc-700 text-zinc-400 rounded uppercase tracking-wider">{sheet.quarter}</span>
                               {sheet.unlockRequested && (
                                 <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 text-[10px] font-semibold uppercase tracking-wider rounded">Unlock Requested</span>
                               )}

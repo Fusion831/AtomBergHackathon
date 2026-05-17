@@ -29,8 +29,26 @@ export default async function ManagerCheckInDetailPage({
   const selectedPeriod = (resolvedParams.period as CheckInPeriod) || activePeriod || "Q1";
   const isReadOnly = selectedPeriod !== activePeriod;
 
-  const sheet = await prisma.goalSheet.findUnique({
+  const baseSheet = await prisma.goalSheet.findUnique({
     where: { id: sheetId },
+    select: { userId: true, cycleId: true }
+  });
+
+  if (!baseSheet) {
+    return (
+      <div className="max-w-4xl mx-auto py-8 px-4 text-center">
+        <h2 className="text-xl text-zinc-300">Goal Sheet not found</h2>
+        <Link href="/manager/checkins" className="text-blue-400 hover:underline mt-4 inline-block">Back to Team Check-ins</Link>
+      </div>
+    );
+  }
+
+  const sheet = await prisma.goalSheet.findFirst({
+    where: {
+      userId: baseSheet.userId,
+      cycleId: baseSheet.cycleId,
+      quarter: selectedPeriod,
+    },
     include: {
       user: {
         include: { department: true }

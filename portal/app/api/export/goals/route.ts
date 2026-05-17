@@ -31,6 +31,11 @@ export async function GET(req: NextRequest) {
     if (managerId) userWhere.managerId = managerId;
   }
 
+  const sheetWhere: any = { cycleId };
+  if (period && period !== "ALL") {
+    sheetWhere.quarter = period;
+  }
+
   // Fetch the data
   const users = await prisma.user.findMany({
     where: userWhere,
@@ -38,7 +43,7 @@ export async function GET(req: NextRequest) {
       department: true,
       manager: true,
       goalSheets: {
-        where: { cycleId },
+        where: sheetWhere,
         include: {
           cycle: true,
           goals: {

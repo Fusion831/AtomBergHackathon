@@ -113,6 +113,7 @@ export default async function SharedGoalsPage() {
                     teamMembers={teamMembers} 
                     assignedIds={goal.childGoals.map(cg => cg.ownerId as string)}
                     cycleId={activeCycle?.id || ""}
+                    quarter={activeCycle?.planningQuarter || activeCycle?.activeQuarter || "Q3"}
                   />
                 </div>
               </div>
