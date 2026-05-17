@@ -37,9 +37,42 @@ export function GoalSheetManager({ sheet }: { sheet: SheetWithGoals }) {
 
   if (sheet.status !== "DRAFT") {
     return (
-      <div className="p-8 text-center bg-zinc-900/50 border border-zinc-800 rounded-xl">
-        <h3 className="text-lg font-medium text-blue-400">Sheet Submitted</h3>
-        <p className="text-sm text-zinc-400 mt-2">Your goals are currently {sheet.status.replace("_", " ").toLowerCase()}. You cannot edit them at this time.</p>
+      <div className="space-y-6">
+        <WeightageProgress current={currentWeightage} />
+        <div>
+          <h2 className="text-lg font-medium text-zinc-100 mb-4">Your Goals ({sheet.goals.length})</h2>
+          <div className="flex flex-col gap-3">
+            {sheet.goals.map((goal) => (
+              <div key={goal.id} className={`flex flex-col gap-4 p-5 bg-zinc-900/40 border ${goal.goalType === "SHARED" ? 'border-blue-500/30' : 'border-zinc-800'} rounded-xl relative overflow-hidden`}>
+                {goal.goalType === "SHARED" && (
+                  <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  </div>
+                )}
+                <div className="space-y-1 relative z-10">
+                  {goal.goalType === "SHARED" && (
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] uppercase tracking-wider font-semibold rounded">Shared KPI</span>
+                    </div>
+                  )}
+                  <h4 className="text-base font-medium text-zinc-100">{goal.title}</h4>
+                  <p className="text-sm text-zinc-400 line-clamp-2">{goal.description || "No description provided."}</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-4 pt-3 border-t border-zinc-800/50 relative z-10">
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-md">
+                    {goal.weightage}% Weight
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-zinc-400 bg-zinc-800 px-2.5 py-1 rounded-md">
+                    {goal.thrustArea}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-zinc-400 bg-zinc-800 px-2.5 py-1 rounded-md">
+                    {goal.uomType} {goal.targetValue !== null ? `(${goal.targetValue})` : ''}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

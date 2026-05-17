@@ -55,6 +55,8 @@ export async function submitGoalSheet(sheetId: string) {
     });
 
     revalidatePath("/dashboard");
+    revalidatePath("/goals/draft");
+    revalidatePath("/manager/review");
     return { success: true };
     
   } catch (error) {

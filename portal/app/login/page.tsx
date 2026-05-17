@@ -8,6 +8,9 @@ export default async function LoginPage() {
   const session = await getServerSession(authOptions);
   
   if (session?.user) {
+    if (session.user.role === "ADMIN") {
+      redirect("/admin/governance");
+    }
     redirect("/goals/draft");
   }
 
@@ -38,10 +41,11 @@ export default async function LoginPage() {
         </div>
 
         <div className="mt-8 text-center text-xs text-zinc-600 space-y-1">
-          <p>Demo accounts (Password: <span className="text-zinc-400 font-mono">password123</span>)</p>
+          <p>Demo accounts (Password: <span className="text-zinc-400 font-mono">password</span>)</p>
           <p className="flex items-center justify-center gap-3">
-            <span>Admin: <span className="text-zinc-400">admin1@company.com</span></span>
-            <span>Manager: <span className="text-zinc-400">manager1@company.com</span></span>
+            <span>Admin: <span className="text-zinc-400">admin@test.com</span></span>
+            <span>Manager: <span className="text-zinc-400">manager@test.com</span></span>
+            <span>Employee: <span className="text-zinc-400">employee@test.com</span></span>
           </p>
         </div>
       </div>

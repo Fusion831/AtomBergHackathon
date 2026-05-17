@@ -110,6 +110,47 @@ async function main() {
     }
   });
 
+  // Manager's own goal sheet (goes to Admin for approval)
+  const managerSheet = await prisma.goalSheet.create({
+    data: {
+      userId: manager.id,
+      cycleId: cycle.id,
+      status: "DRAFT"
+    }
+  });
+
+  await prisma.goal.create({
+    data: {
+      sheetId: managerSheet.id,
+      ownerId: manager.id,
+      departmentId: dept.id,
+      title: "Improve Team Velocity",
+      description: "Increase sprint velocity by 20% through process improvements and tooling upgrades.",
+      thrustArea: "Leadership",
+      uomType: "PERCENTAGE",
+      targetValue: 20,
+      weightage: 50,
+      status: "NOT_STARTED",
+      goalType: "INDIVIDUAL"
+    }
+  });
+
+  await prisma.goal.create({
+    data: {
+      sheetId: managerSheet.id,
+      ownerId: manager.id,
+      departmentId: dept.id,
+      title: "Complete All Quarterly Check-ins",
+      description: "Ensure 100% of team members complete their quarterly check-ins on time.",
+      thrustArea: "People Management",
+      uomType: "PERCENTAGE",
+      targetValue: 100,
+      weightage: 50,
+      status: "NOT_STARTED",
+      goalType: "INDIVIDUAL"
+    }
+  });
+
   console.log("Database seeded successfully.");
 }
 
