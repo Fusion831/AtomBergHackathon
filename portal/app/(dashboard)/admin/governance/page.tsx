@@ -9,7 +9,7 @@ import { Users, FileText, Lock, Calendar, Activity, CheckCircle, XCircle, Unlock
 import { RecentActivityFeed } from "@/components/audit/RecentActivityFeed";
 import { formatAuditAction, formatAuditTimestamp } from "@/lib/auditFormatter";
 
-export default async function AdminGovernancePage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+export default async function AdminGovernancePage({ searchParams }: { searchParams: Promise<{ tab?: string; quarter?: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session?.user || session.user.role !== "ADMIN") {
     redirect("/dashboard");
@@ -24,6 +24,7 @@ export default async function AdminGovernancePage({ searchParams }: { searchPara
   });
 
   const activeCycle = cycles.find(c => c.isActive);
+  const selectedQuarter = (resolvedParams.quarter || activeCycle?.activeQuarter || "Q2") as any;
 
   // Fetch overall completion metrics
   const totalEmployees = await prisma.user.count({
@@ -31,7 +32,10 @@ export default async function AdminGovernancePage({ searchParams }: { searchPara
   });
 
   const sheets = await prisma.goalSheet.findMany({
-    where: { cycleId: activeCycle?.id },
+    where: { 
+      cycleId: activeCycle?.id,
+      quarter: selectedQuarter
+    },
     include: { user: true }
   });
 
@@ -117,9 +121,36 @@ export default async function AdminGovernancePage({ searchParams }: { searchPara
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-medium text-zinc-100">Goal Sheet Overrides</h2>
-                  <span className="text-xs text-zinc-500 bg-zinc-900 px-2 py-1 rounded">Active Cycle: {activeCycle?.name || "None"}</span>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2">
+                  <div>
+                    <h2 className="text-lg font-medium text-zinc-100">Goal Sheet Overrides</h2>
+                    <p className="text-xs text-zinc-500 mt-0.5">Manage, review, and retroactively unlock goal sheets for {selectedQuarter}.</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex bg-zinc-950 p-0.5 rounded-lg border border-zinc-800 text-[11px] self-start">
+                      <Link 
+                        href={`/admin/governance?tab=overview&quarter=Q2`}
+                        className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+                          selectedQuarter === "Q2" 
+                            ? "bg-zinc-900 text-zinc-100 shadow-sm border border-zinc-850" 
+                            : "text-zinc-500 hover:text-zinc-300"
+                        }`}
+                      >
+                        Q2 Performance
+                      </Link>
+                      <Link 
+                        href={`/admin/governance?tab=overview&quarter=Q3`}
+                        className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+                          selectedQuarter === "Q3" 
+                            ? "bg-zinc-900 text-zinc-100 shadow-sm border border-zinc-850" 
+                            : "text-zinc-500 hover:text-zinc-300"
+                        }`}
+                      >
+                        Q3 Planning
+                      </Link>
+                    </div>
+                    <span className="text-xs text-zinc-500 bg-zinc-900 px-2 py-1 rounded border border-zinc-800/80 shrink-0">Active Cycle: {activeCycle?.name || "None"}</span>
+                  </div>
                 </div>
                 <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
                   {lockedCount === 0 ? (

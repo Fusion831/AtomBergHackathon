@@ -37,10 +37,11 @@ export default async function DashboardLayout({ children }: { children: ReactNod
               </div>
             </div>
             <nav className="hidden md:flex items-center gap-5 text-sm font-medium text-zinc-400">
-              {session.user.role !== "ADMIN" && (
+              {session.user.role === "EMPLOYEE" && (
                 <>
                   <a href="/goals/draft" className="hover:text-zinc-100 transition-colors">My Goals</a>
                   <a href="/checkins" className="hover:text-zinc-100 transition-colors">Check-ins</a>
+                  <a href="/reports" className="hover:text-zinc-100 transition-colors text-blue-400/90 hover:text-blue-400">Insights</a>
                 </>
               )}
               {(session.user.role === "MANAGER" || session.user.role === "ADMIN") && (
@@ -49,7 +50,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
                   <a href="/manager/checkins" className="hover:text-zinc-100 transition-colors">Team Check-ins</a>
                   <a href="/manager/shared-goals" className="hover:text-zinc-100 transition-colors">Shared KPIs</a>
                   <a href="/directory" className="hover:text-zinc-100 transition-colors">Directory</a>
-                  <a href="/reports" className="hover:text-zinc-100 transition-colors">Reports</a>
+                  <a href="/reports" className="hover:text-zinc-100 transition-colors text-blue-400/90 hover:text-blue-400">Analytics & Reports</a>
                 </>
               )}
               {session.user.role === "ADMIN" && (

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Search, Filter, ChevronRight, User as UserIcon } from "lucide-react";
 import { DirectoryFilters } from "@/components/directory/DirectoryFilters";
 
-export default async function DirectoryPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string; departmentId?: string; managerId?: string }> }) {
+export default async function DirectoryPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string; departmentId?: string; managerId?: string; quarter?: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session?.user || (session.user.role !== "ADMIN" && session.user.role !== "MANAGER")) {
     redirect("/dashboard");
@@ -15,6 +15,8 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Pr
   const resolvedParams = await searchParams;
   const isAdmin = session.user.role === "ADMIN";
   const activeCycle = await prisma.goalCycle.findFirst({ where: { isActive: true } });
+  
+  const selectedQuarter = (resolvedParams.quarter || activeCycle?.activeQuarter || "Q2") as any;
 
   // Base where clause. If not admin, restrict to team members
   const whereClause: any = {};
@@ -44,6 +46,7 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Pr
       whereClause.goalSheets = {
         some: {
           cycleId: activeCycle.id,
+          quarter: selectedQuarter,
           status: { in: ["SUBMITTED", "UNDER_REVIEW"] }
         }
       };
@@ -51,6 +54,7 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Pr
       whereClause.goalSheets = {
         some: {
           cycleId: activeCycle.id,
+          quarter: selectedQuarter,
           status: resolvedParams.status
         }
       };
@@ -63,7 +67,7 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Pr
       department: true,
       manager: true,
       goalSheets: {
-        where: { cycleId: activeCycle?.id },
+        where: { cycleId: activeCycle?.id, quarter: selectedQuarter },
         include: {
           goals: {
             include: { checkIns: true }

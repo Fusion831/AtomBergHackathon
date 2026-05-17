@@ -9,7 +9,7 @@ interface DirectoryFiltersProps {
   isAdmin: boolean;
   departments: Department[];
   managers: User[];
-  currentParams: { q?: string; status?: string; departmentId?: string; managerId?: string };
+  currentParams: { q?: string; status?: string; departmentId?: string; managerId?: string; quarter?: string };
 }
 
 export function DirectoryFilters({ isAdmin, departments, managers, currentParams }: DirectoryFiltersProps) {
@@ -48,6 +48,19 @@ export function DirectoryFilters({ isAdmin, departments, managers, currentParams
           <Search size={16} className="absolute left-3 top-2.5 text-zinc-500" />
         </div>
       </form>
+
+      <div>
+        <label className="block text-xs font-medium text-zinc-400 mb-1.5 uppercase tracking-wider">Quarter Cycle</label>
+        <select 
+          value={currentParams.quarter || "Q2"}
+          onChange={(e) => updateFilters("quarter", e.target.value)}
+          className="w-full bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-blue-500"
+        >
+          <option value="Q2">Q2 (Performance)</option>
+          <option value="Q3">Q3 (Planning)</option>
+          <option value="Q1">Q1 (Completed)</option>
+        </select>
+      </div>
 
       {isAdmin && (
         <>
