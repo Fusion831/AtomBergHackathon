@@ -1,7 +1,8 @@
 "use client";
 
 import { signIn, getSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
 export function LoginForm() {
@@ -10,11 +11,17 @@ export function LoginForm() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setIsTransitioning(true);
     setError("");
 
     try {
@@ -27,10 +34,8 @@ export function LoginForm() {
       if (res?.error) {
         setError("Invalid credentials. Please try again.");
         setIsLoading(false);
+        setIsTransitioning(false);
       } else {
-        // Trigger high-fidelity optimistic transition skeleton instantly
-        setIsTransitioning(true);
-        
         // Fetch session to determine target redirection role
         const session = await getSession();
         if (session?.user?.role === "ADMIN") {
@@ -103,8 +108,8 @@ export function LoginForm() {
       </button>
     </form>
     
-    {isTransitioning && (
-      <div className="fixed inset-0 z-50 bg-black flex animate-fade-in font-sans">
+    {isTransitioning && mounted && createPortal(
+      <div className="fixed inset-0 z-[9999] bg-black flex animate-fade-in font-sans">
         {/* Left Sidebar Skeleton */}
         <div className="w-64 border-r border-zinc-800 bg-zinc-950 p-6 flex flex-col justify-between shrink-0 h-full">
           <div className="space-y-8">
@@ -214,7 +219,8 @@ export function LoginForm() {
             </div>
           </div>
         </div>
-      </div>
+      </div>,
+      document.body
     )}
     </>
   );

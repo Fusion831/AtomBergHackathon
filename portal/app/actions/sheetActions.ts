@@ -109,3 +109,61 @@ export async function requestUnlock(sheetId: string, reason: string) {
     return { success: false, message: "An error occurred while requesting unlock." };
   }
 }
+
+export async function requestManagerUnlock(sheetId: string, reason: string, notes?: string) {
+  const session = await getServerSession(authOptions);
+  if (!session) return { success: false, message: "Unauthorized" };
+  if (session.user.role !== "MANAGER" && session.user.role !== "ADMIN") {
+    return { success: false, message: "Only managers or admins can request unlocks on behalf of employees." };
+  }
+
+  try {
+    const sheet = await prisma.goalSheet.findUnique({
+      where: { id: sheetId },
+      include: { user: true }
+    });
+
+    if (!sheet) return { success: false, message: "Goal sheet not found" };
+    if (sheet.user.managerId !== session.user.id && session.user.role !== "ADMIN") {
+      return { success: false, message: "You are not authorized to manage this employee's goals." };
+    }
+    if (sheet.status !== "LOCKED" && sheet.status !== "APPROVED") {
+      return { success: false, message: "Sheet must be locked or approved to request unlock." };
+    }
+    if (sheet.unlockRequested) {
+      return { success: false, message: "An unlock request is already pending." };
+    }
+
+    const fullReason = `[Manager Request by ${session.user.name}]: ${reason}${notes ? ` | Rec: ${notes}` : ""}`;
+
+    await prisma.$transaction(async (tx) => {
+      await tx.goalSheet.update({
+        where: { id: sheetId },
+        data: { 
+          unlockRequested: true,
+          unlockReason: fullReason
+        }
+      });
+
+      await tx.auditLog.create({
+        data: {
+          actorId: session.user.id,
+          action: "REQUEST_UNLOCK",
+          entityType: "GoalSheet",
+          entityId: sheetId,
+          oldValues: {},
+          newValues: { reason: fullReason, requestedBy: "MANAGER" }
+        }
+      });
+    });
+
+    revalidatePath("/manager/review");
+    revalidatePath(`/manager/review/${sheetId}`);
+    revalidatePath("/admin/governance");
+    return { success: true };
+    
+  } catch (error) {
+    console.error("Error in requestManagerUnlock:", error);
+    return { success: false, message: "An error occurred while requesting unlock." };
+  }
+}

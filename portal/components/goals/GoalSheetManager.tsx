@@ -123,13 +123,32 @@ export function GoalSheetManager({
         )}
 
         {!isHistorical && (
-          <div className="flex items-center justify-between p-4 rounded-xl border bg-emerald-500/5 border-emerald-500/10">
-            <span className="text-sm font-medium text-zinc-300">
-              Goal Sheet Quarter: <strong className="text-emerald-400">{sheet.quarter}</strong>
-            </span>
-            <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded uppercase tracking-wider">
-              {sheet.status}
-            </span>
+          <div className="flex items-center justify-between p-4 rounded-xl border bg-zinc-900 border-zinc-800">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-zinc-300">
+                Quarter Performance Scope: <strong className="text-blue-400 font-semibold">{sheet.quarter}</strong>
+              </span>
+              <span className="px-2 py-0.5 text-[9px] font-bold bg-zinc-950 border border-zinc-800 text-zinc-400 rounded uppercase tracking-wider">
+                {sheet.status}
+              </span>
+              {sheet.status === "LOCKED" && sheet.unlockRequested && (
+                <span className="px-2 py-0.5 text-[9px] font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded uppercase tracking-wider animate-pulse flex items-center gap-1">
+                  <Unlock size={10} /> Unlock Pending
+                </span>
+              )}
+            </div>
+            {sheet.status === "LOCKED" && !sheet.unlockRequested && !showUnlockModal && (
+              <button
+                type="button"
+                onClick={() => {
+                  setUnlockReason("");
+                  setShowUnlockModal(true);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 rounded-md transition-all font-semibold text-xs cursor-pointer shadow-sm active:scale-[0.98]"
+              >
+                <Unlock size={12} /> Request Unlock
+              </button>
+            )}
           </div>
         )}
 
@@ -222,19 +241,6 @@ export function GoalSheetManager({
             </div>
           )}
 
-          {!isHistorical && sheet.status === "LOCKED" && !sheet.unlockRequested && !showUnlockModal && (
-            <div className="mt-8 flex justify-end">
-              <button
-                onClick={() => {
-                  setUnlockReason("");
-                  setShowUnlockModal(true);
-                }}
-                className="flex items-center gap-2 px-4 py-2 bg-amber-600/10 text-amber-500 hover:bg-amber-600/20 border border-amber-600/20 rounded-md transition-colors font-medium text-sm"
-              >
-                <Unlock size={16} /> Request Unlock
-              </button>
-            </div>
-          )}
 
           {sheet.status === "LOCKED" && sheet.unlockRequested && (
             <div className="mt-8 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-3">

@@ -48,10 +48,10 @@ export function Sidebar({ user, activeQuarter, planningQuarter }: SidebarProps) 
       { label: "Employee Reviews", href: "/manager/review", icon: CheckCircle },
       { label: "Team Check-ins", href: "/manager/checkins", icon: Users },
       { label: "Shared KPIs", href: "/manager/shared-goals", icon: Target },
-      { label: "Directory", href: "/directory", icon: Compass },
     ],
     admin: [
       { label: "System Governance", href: "/admin/governance", icon: Lock },
+      { label: "Directory", href: "/directory", icon: Compass },
     ]
   };
 

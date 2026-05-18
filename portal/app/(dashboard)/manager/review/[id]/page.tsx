@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ChevronLeft, Lock } from "lucide-react";
 import { GoalReviewCard } from "@/components/manager/GoalReviewCard";
 import { ManagerReviewActions } from "@/components/manager/ManagerReviewActions";
+import { ManagerUnlockRequest } from "@/components/manager/ManagerUnlockRequest";
 
 export default async function ManagerReviewDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
@@ -93,12 +94,22 @@ export default async function ManagerReviewDetailPage({ params }: { params: Prom
       </div>
 
       {isReadOnly && (
-        <div className="mb-8 p-4 bg-zinc-900/50 border border-zinc-800/80 rounded-lg flex items-start gap-3">
-          <Lock className="text-zinc-500 shrink-0 mt-0.5" size={20} />
-          <div>
-            <h4 className="text-zinc-300 font-medium">This sheet is locked</h4>
-            <p className="text-sm text-zinc-500 mt-1">It has been approved and cannot be modified further. Contact an Administrator if changes are absolutely necessary.</p>
+        <div className="space-y-6 mb-8">
+          <div className="p-4 bg-zinc-900/40 border border-zinc-900 rounded-xl flex items-start gap-3">
+            <Lock className="text-zinc-500 shrink-0 mt-0.5" size={18} />
+            <div>
+              <h4 className="text-zinc-300 font-medium text-xs">Goal Sheet Committed & Locked</h4>
+              <p className="text-[11px] text-zinc-500 mt-0.5">This sheet has been fully approved and is currently active. Target modifications are governed under Admin override.</p>
+            </div>
           </div>
+          <ManagerUnlockRequest 
+            sheetId={sheet.id}
+            employeeName={sheet.user.name}
+            quarter={sheet.quarter}
+            departmentName={sheet.user.department?.name || "No Department"}
+            initialUnlockRequested={sheet.unlockRequested}
+            initialUnlockReason={sheet.unlockReason}
+          />
         </div>
       )}
 
