@@ -23,7 +23,7 @@ export default async function AdminGovernancePage({ searchParams }: { searchPara
     orderBy: { startDate: "desc" }
   });
 
-  const activeCycle = cycles.find(c => c.isActive);
+  const activeCycle = cycles.find((c: { isActive: boolean }) => c.isActive);
   const selectedQuarter = (resolvedParams.quarter || activeCycle?.activeQuarter || "Q2") as any;
 
   // Fetch overall completion metrics
