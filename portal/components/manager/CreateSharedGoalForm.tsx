@@ -3,10 +3,18 @@
 import { useState, useTransition } from "react";
 import { createSharedGoal } from "@/app/actions/sharedGoalActions";
 import { Target } from "lucide-react";
+import { UomType, MetricDirection } from "@prisma/client";
 
 export function CreateSharedGoalForm() {
   const [isPending, startTransition] = useTransition();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    description: string;
+    thrustArea: string;
+    uomType: UomType;
+    metricDirection: MetricDirection;
+    targetValue: string;
+  }>({
     title: "",
     description: "",
     thrustArea: "Financial",
@@ -80,7 +88,7 @@ export function CreateSharedGoalForm() {
           <label className="block text-xs font-medium text-zinc-400 mb-1">UoM</label>
           <select 
             value={formData.uomType}
-            onChange={e => setFormData({...formData, uomType: e.target.value})}
+            onChange={e => setFormData({...formData, uomType: e.target.value as UomType})}
             className="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-blue-500"
           >
             <option value="NUMERIC">Numeric</option>
@@ -92,7 +100,7 @@ export function CreateSharedGoalForm() {
           <label className="block text-xs font-medium text-zinc-400 mb-1">Metric Direction</label>
           <select 
             value={formData.metricDirection}
-            onChange={e => setFormData({...formData, metricDirection: e.target.value})}
+            onChange={e => setFormData({...formData, metricDirection: e.target.value as MetricDirection})}
             className="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-blue-500"
           >
             <option value="HIGHER_IS_BETTER">Higher is Better (e.g., Revenue)</option>

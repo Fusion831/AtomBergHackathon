@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { assignSharedGoal } from "@/app/actions/sharedGoalActions";
-import { User } from "@prisma/client";
+import { User, CheckInPeriod } from "@prisma/client";
 import { UserPlus, X } from "lucide-react";
 
 export function AssignSharedGoalModal({ 
@@ -16,7 +16,7 @@ export function AssignSharedGoalModal({
   teamMembers: User[]; 
   assignedIds: string[];
   cycleId: string;
-  quarter: string;
+  quarter: CheckInPeriod;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();

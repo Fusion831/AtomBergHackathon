@@ -1,6 +1,6 @@
 "use client";
 
-import { Goal, CheckIn, CheckInPeriod } from "@prisma/client";
+import { Goal, CheckIn, CheckInPeriod, GoalStatus } from "@prisma/client";
 import { useState, useTransition } from "react";
 import { upsertCheckIn } from "@/app/actions/checkInActions";
 import { Save, MessageSquare } from "lucide-react";
@@ -13,7 +13,7 @@ export function CheckInCard({ goal, activePeriod, readOnly }: { goal: GoalWithCh
   
   const [actualValue, setActualValue] = useState(currentCheckIn?.actualValue?.toString() || "");
   const [employeeComment, setEmployeeComment] = useState(currentCheckIn?.employeeComment || "");
-  const [statusOverride, setStatusOverride] = useState<string>(currentCheckIn?.status || "");
+  const [statusOverride, setStatusOverride] = useState<GoalStatus | undefined>(currentCheckIn?.status || undefined);
 
   const handleSave = () => {
     startTransition(async () => {
@@ -30,7 +30,7 @@ export function CheckInCard({ goal, activePeriod, readOnly }: { goal: GoalWithCh
 
   const hasChanges = actualValue !== (currentCheckIn?.actualValue?.toString() || "") ||
                      employeeComment !== (currentCheckIn?.employeeComment || "") ||
-                     statusOverride !== (currentCheckIn?.status || "");
+                     statusOverride !== (currentCheckIn?.status || undefined);
 
   return (
     <div className="p-5 bg-zinc-900 border border-zinc-800 rounded-xl space-y-4">
@@ -109,8 +109,8 @@ export function CheckInCard({ goal, activePeriod, readOnly }: { goal: GoalWithCh
                   className="flex-1 bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-blue-500"
                 />
                 <select
-                  value={statusOverride}
-                  onChange={(e) => setStatusOverride(e.target.value)}
+                  value={statusOverride || ""}
+                  onChange={(e) => setStatusOverride(e.target.value ? (e.target.value as GoalStatus) : undefined)}
                   className="w-40 bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-blue-500"
                 >
                   <option value="">Auto-calculate</option>
