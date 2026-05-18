@@ -114,7 +114,7 @@ async function main() {
       metricDirection: MetricDirection.HIGHER_IS_BETTER,
       targetValue: 100,
       weightage: 60,
-      status: GoalStatus.ON_TRACK
+      status: GoalStatus.IN_PROGRESS
     }
   });
 
@@ -142,7 +142,7 @@ async function main() {
       actualValue: 60,
       actualDate: new Date(),
       progressScore: 60,
-      status: GoalStatus.ON_TRACK,
+      status: GoalStatus.IN_PROGRESS,
       employeeComment: "Initial workflow optimization has trimmed 3 minutes from test build loops.",
       managerComment: "Promising progress. Keep optimizing database scripts in migration blocks."
     }
@@ -178,7 +178,7 @@ async function main() {
       metricDirection: MetricDirection.HIGHER_IS_BETTER,
       targetValue: 100,
       weightage: 100,
-      status: GoalStatus.ON_TRACK
+      status: GoalStatus.IN_PROGRESS
     }
   });
 
@@ -189,7 +189,7 @@ async function main() {
       actualValue: 40,
       actualDate: new Date(),
       progressScore: 40,
-      status: GoalStatus.ON_TRACK,
+      status: GoalStatus.IN_PROGRESS,
       employeeComment: "Scanned existing infrastructure. Configured initial vulnerability charts.",
       managerComment: "Approved milestone. Focus next on persistent secrets tokenization."
     }

@@ -16,7 +16,8 @@ import {
   getManagerAnalytics, 
   getEmployeeAnalytics 
 } from "@/lib/analytics";
-import { FileSpreadsheet, BarChart3, TrendingUp, Sparkles } from "lucide-react";
+import { FileSpreadsheet, BarChart3, Sparkles } from "lucide-react";
+import { getLifecycleAwareCycle } from "@/lib/quarterLifecycle";
 
 export default async function ReportsPage({ 
   searchParams 
@@ -32,9 +33,10 @@ export default async function ReportsPage({
   const currentTab = resolvedParams.tab || "insights";
 
   // 1. Fetch active goal cycle
-  const activeCycle = await prisma.goalCycle.findFirst({
+  const rawCycle = await prisma.goalCycle.findFirst({
     where: { isActive: true }
   });
+  const activeCycle = getLifecycleAwareCycle(rawCycle);
 
   if (!activeCycle) {
     return (
@@ -132,7 +134,7 @@ export default async function ReportsPage({
 // Fallback error alert helper
 function AlertTriangle({ size, className }: { size?: number; className?: string }) {
   return (
-    <svg xmlns="http://www.w3.org/2500/svg" width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <svg xmlns="http://www.w3.org/2000/svg" width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
       <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
       <line x1="12" y1="9" x2="12" y2="13"/>
       <line x1="12" y1="17" x2="12.01" y2="17"/>

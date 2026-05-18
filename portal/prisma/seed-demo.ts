@@ -231,7 +231,7 @@ async function main() {
       uomType: UomType.PERCENTAGE,
       targetValue: 99.99,
       weightage: 50,
-      status: GoalStatus.ON_TRACK,
+      status: GoalStatus.IN_PROGRESS,
       goalType: GoalType.SHARED
     }
   });
@@ -303,6 +303,17 @@ async function main() {
       });
     }
 
+    // Custom flow for David Kim (Another pending unlock request)
+    if (user.email === "david.kim@test.com") {
+      await prisma.goalSheet.update({
+        where: { id: sheetQ2.id },
+        data: {
+          unlockRequested: true,
+          unlockReason: "Shifted scope on scale multi-region cluster goals due to regional provider outage."
+        }
+      });
+    }
+
     for (let i = 0; i < goalsDef.Q2.length; i++) {
       const gDef = goalsDef.Q2[i];
       const weight = user.id === platformEngManager.id ? 25 : (i === 0 ? 50 : 50);
@@ -321,7 +332,7 @@ async function main() {
           uomType: gDef.uomType,
           targetValue: isSharedCascade ? 99.99 : gDef.targetValue,
           weightage: weight,
-          status: GoalStatus.ON_TRACK,
+          status: GoalStatus.IN_PROGRESS,
           goalType: isSharedCascade ? GoalType.SHARED : GoalType.INDIVIDUAL,
           parentGoalId: isSharedCascade ? masterUptimeGoal.id : null
         }
@@ -338,7 +349,7 @@ async function main() {
           actualValue: isSharedCascade ? 99.95 : (gDef.targetValue * (q1Score / 100)),
           actualDate: new Date("2026-06-12T10:00:00Z"),
           progressScore: q1Score,
-          status: GoalStatus.ON_TRACK,
+          status: GoalStatus.IN_PROGRESS,
           employeeComment: "Initial telemetry hooks and pipelines verified. On track for targeted delivery.",
           managerComment: "Good initial milestone alignment."
         }
@@ -352,7 +363,7 @@ async function main() {
           actualValue: isSharedCascade ? 99.98 : (gDef.targetValue * (q2Score / 100)),
           actualDate: new Date("2026-09-15T14:30:00Z"),
           progressScore: q2Score,
-          status: GoalStatus.ON_TRACK,
+          status: GoalStatus.IN_PROGRESS,
           employeeComment: "System architecture optimized, metrics verified under high stress conditions.",
           managerComment: "Valid performance. Approved for phase close."
         }
@@ -360,20 +371,25 @@ async function main() {
 
       await prisma.goal.update({
         where: { id: goal.id },
-        data: { currentProgress: q2Score, status: GoalStatus.ON_TRACK }
+        data: { currentProgress: q2Score, status: GoalStatus.IN_PROGRESS }
       });
     }
 
-    // ---------------- Q3 PLANNING (Draft/Submitted/Under Review) ----------------
+    // ---------------- Q3 PLANNING (Draft/Submitted/Under Review/Approved) ----------------
     let statusQ3: GoalSheetStatus = GoalSheetStatus.DRAFT;
     let submittedAt = null;
 
+    // Distribute realistic compliance across Q3 planning
     if (user.email === "sophie.dubois@test.com") {
       statusQ3 = GoalSheetStatus.SUBMITTED;
       submittedAt = new Date("2026-05-10T12:00:00Z");
     } else if (user.email === "samira.begum@test.com") {
       statusQ3 = GoalSheetStatus.UNDER_REVIEW;
       submittedAt = new Date("2026-05-12T14:30:00Z");
+    } else if (user.email === "marcus.vance@test.com" || user.email === "olivia.wild@test.com" || user.email === "priya.nair@test.com") {
+      // Completed approvals in planning stage
+      statusQ3 = GoalSheetStatus.APPROVED;
+      submittedAt = new Date("2026-05-08T09:00:00Z");
     }
 
     const sheetQ3 = await prisma.goalSheet.create({

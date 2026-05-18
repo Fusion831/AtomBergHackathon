@@ -49,6 +49,6 @@ export function calculateProgressScore(
 
 export function determineStatus(score: number): GoalStatus {
   if (score >= 100) return "COMPLETED";
-  if (score >= 50) return "ON_TRACK";
+  if (score >= 50) return "IN_PROGRESS";
   return "NOT_STARTED";
 }

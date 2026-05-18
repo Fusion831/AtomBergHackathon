@@ -75,7 +75,7 @@ export function GoalSheetManager({
       const checkIn = goal.checkIns?.find((c: CheckIn) => c.period === sheet.quarter);
       const score = checkIn 
         ? (checkIn.progressScore ?? 0) 
-        : (goal.status === "COMPLETED" ? 100 : (goal.status === "ON_TRACK" ? 75 : 0));
+        : (goal.status === "COMPLETED" ? 100 : (goal.status === "IN_PROGRESS" ? 75 : 0));
         
       totalWeightedScore += score * goal.weightage;
       totalWeightage += goal.weightage;

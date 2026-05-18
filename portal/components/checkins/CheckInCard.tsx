@@ -56,7 +56,7 @@ export function CheckInCard({ goal, activePeriod, readOnly }: { goal: GoalWithCh
         <div className="text-right">
           <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full border ${
             currentCheckIn?.status === "COMPLETED" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
-            currentCheckIn?.status === "ON_TRACK" ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
+            currentCheckIn?.status === "IN_PROGRESS" ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
             "bg-zinc-800 text-zinc-400 border-zinc-700"
           }`}>
             {currentCheckIn?.status?.replace("_", " ") || "NOT STARTED"}
@@ -117,7 +117,7 @@ export function CheckInCard({ goal, activePeriod, readOnly }: { goal: GoalWithCh
                 >
                   <option value="">Auto-calculate</option>
                   <option value="NOT_STARTED">Not Started</option>
-                  <option value="ON_TRACK">On Track</option>
+                  <option value="IN_PROGRESS">On Track</option>
                   <option value="COMPLETED">Completed</option>
                 </select>
               </div>

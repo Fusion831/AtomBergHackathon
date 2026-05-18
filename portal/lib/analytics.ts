@@ -147,7 +147,7 @@ export async function getAdminAnalytics(cycleId: string, quarter: CheckInPeriod)
   // Statuses
   const statusCounts = {
     NOT_STARTED: goals.filter(g => g.status === "NOT_STARTED").length,
-    ON_TRACK: goals.filter(g => g.status === "ON_TRACK").length,
+    IN_PROGRESS: goals.filter(g => g.status === "IN_PROGRESS").length,
     COMPLETED: goals.filter(g => g.status === "COMPLETED").length
   };
 
@@ -233,7 +233,7 @@ export async function getAdminAnalytics(cycleId: string, quarter: CheckInPeriod)
     qSheets.forEach(sheet => {
       sheet.goals.forEach(goal => {
         const checkIn = goal.checkIns[0];
-        const score = checkIn ? (checkIn.progressScore ?? 0) : (goal.status === "COMPLETED" ? 100 : (goal.status === "ON_TRACK" ? 75 : 0));
+        const score = checkIn ? (checkIn.progressScore ?? 0) : (goal.status === "COMPLETED" ? 100 : (goal.status === "IN_PROGRESS" ? 75 : 0));
         totalScore += score;
         countedGoals++;
         if (goal.status === "COMPLETED" || (checkIn && checkIn.status === "COMPLETED")) {
@@ -314,7 +314,7 @@ export async function getManagerAnalytics(managerId: string, cycleId: string, qu
       goalsCount = sheet.goals.length;
       const totalScore = sheet.goals.reduce((sum, goal) => {
         const checkIn = goal.checkIns[0];
-        const score = checkIn ? (checkIn.progressScore ?? 0) : (goal.status === "COMPLETED" ? 100 : (goal.status === "ON_TRACK" ? 75 : 0));
+        const score = checkIn ? (checkIn.progressScore ?? 0) : (goal.status === "COMPLETED" ? 100 : (goal.status === "IN_PROGRESS" ? 75 : 0));
         return sum + score;
       }, 0);
       avgProgress = goalsCount > 0 ? Math.round(totalScore / goalsCount) : 0;
@@ -358,7 +358,7 @@ export async function getManagerAnalytics(managerId: string, cycleId: string, qu
     if (cascadeCount > 0) {
       const totalProgress = mg.childGoals.reduce((sum, cg) => {
         const checkIn = cg.checkIns[0];
-        const score = checkIn ? (checkIn.progressScore ?? 0) : (cg.status === "COMPLETED" ? 100 : (cg.status === "ON_TRACK" ? 75 : 0));
+        const score = checkIn ? (checkIn.progressScore ?? 0) : (cg.status === "COMPLETED" ? 100 : (cg.status === "IN_PROGRESS" ? 75 : 0));
         return sum + score;
       }, 0);
       avgProgress = Math.round(totalProgress / cascadeCount);
@@ -406,7 +406,7 @@ export async function getManagerAnalytics(managerId: string, cycleId: string, qu
       if (sheet) {
         sheet.goals.forEach(goal => {
           const checkIn = goal.checkIns[0];
-          const score = checkIn ? (checkIn.progressScore ?? 0) : (goal.status === "COMPLETED" ? 100 : (goal.status === "ON_TRACK" ? 75 : 0));
+          const score = checkIn ? (checkIn.progressScore ?? 0) : (goal.status === "COMPLETED" ? 100 : (goal.status === "IN_PROGRESS" ? 75 : 0));
           qTotal += score;
           qCount++;
           if (goal.status === "COMPLETED" || (checkIn && checkIn.status === "COMPLETED")) {
@@ -467,7 +467,7 @@ export async function getEmployeeAnalytics(employeeId: string, cycleId: string, 
   const goalsCount = goals.length;
 
   const completedCount = goals.filter(g => g.status === "COMPLETED").length;
-  const onTrackCount = goals.filter(g => g.status === "ON_TRACK").length;
+  const onTrackCount = goals.filter(g => g.status === "IN_PROGRESS").length;
   const notStartedCount = goals.filter(g => g.status === "NOT_STARTED").length;
 
   // Personal score
@@ -475,7 +475,7 @@ export async function getEmployeeAnalytics(employeeId: string, cycleId: string, 
   if (goalsCount > 0) {
     const totalScore = goals.reduce((sum, g) => {
       const checkIn = g.checkIns[0];
-      const score = checkIn ? (checkIn.progressScore ?? 0) : (g.status === "COMPLETED" ? 100 : (g.status === "ON_TRACK" ? 75 : 0));
+      const score = checkIn ? (checkIn.progressScore ?? 0) : (g.status === "COMPLETED" ? 100 : (g.status === "IN_PROGRESS" ? 75 : 0));
       return sum + score;
     }, 0);
     personalScore = Math.round(totalScore / goalsCount);
@@ -506,7 +506,7 @@ export async function getEmployeeAnalytics(employeeId: string, cycleId: string, 
         id: g.id,
         title: g.title,
         weightage: g.weightage,
-        progress: checkIn ? (checkIn.progressScore ?? 0) : (g.status === "COMPLETED" ? 100 : (g.status === "ON_TRACK" ? 75 : 0))
+        progress: checkIn ? (checkIn.progressScore ?? 0) : (g.status === "COMPLETED" ? 100 : (g.status === "IN_PROGRESS" ? 75 : 0))
       };
     });
 
@@ -535,7 +535,7 @@ export async function getEmployeeAnalytics(employeeId: string, cycleId: string, 
     if (qSheet) {
       qSheet.goals.forEach(goal => {
         const checkIn = goal.checkIns[0];
-        const score = checkIn ? (checkIn.progressScore ?? 0) : (goal.status === "COMPLETED" ? 100 : (goal.status === "ON_TRACK" ? 75 : 0));
+        const score = checkIn ? (checkIn.progressScore ?? 0) : (goal.status === "COMPLETED" ? 100 : (goal.status === "IN_PROGRESS" ? 75 : 0));
         qTotal += score;
         qCount++;
         if (goal.status === "COMPLETED" || (checkIn && checkIn.status === "COMPLETED")) {

@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/auth/authOptions";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { calculateProgressScore, determineStatus } from "@/lib/progress";
 import { CheckInPeriod, GoalStatus } from "@prisma/client";
+import { getLifecycleAwareCycle } from "@/lib/quarterLifecycle";
 
 export async function upsertCheckIn(
   goalId: string, 
@@ -43,8 +44,9 @@ export async function upsertCheckIn(
     const status = data.statusOverride || determineStatus(score);
 
     const result = await prisma.$transaction(async (tx) => {
-      // Enforce active window
-      const activeCycle = await tx.goalCycle.findFirst({ where: { isActive: true } });
+      // Enforce active window using calendar-aware lifecycle engine
+      const rawCycle = await tx.goalCycle.findFirst({ where: { isActive: true } });
+      const activeCycle = getLifecycleAwareCycle(rawCycle);
       if (!activeCycle || activeCycle.activeQuarter !== period) {
         return { success: false, message: "Check-in window is currently closed for this period." };
       }

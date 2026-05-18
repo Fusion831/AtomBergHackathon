@@ -26,8 +26,11 @@ enum GoalSheetStatus {
 
 enum GoalStatus {
   NOT_STARTED
-  ON_TRACK
+  IN_PROGRESS
+  AT_RISK
+  DELAYED
   COMPLETED
+  AWAITING_REVIEW
 }
 
 enum UomType {

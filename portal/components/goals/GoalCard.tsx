@@ -42,11 +42,11 @@ export function GoalCard({ goal, sheetId, onEdit }: { goal: Goal, sheetId: strin
         <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider border ${
           goal.status === "COMPLETED" 
             ? "bg-emerald-500/10 text-emerald-450 border-emerald-500/20"
-            : goal.status === "ON_TRACK"
+            : goal.status === "IN_PROGRESS"
             ? "bg-blue-500/10 text-blue-450 border-blue-500/20"
             : "bg-zinc-900 text-zinc-550 border-zinc-800"
         }`}>
-          {goal.status === "COMPLETED" ? "Completed" : goal.status === "ON_TRACK" ? "On Track" : "Not Started"}
+          {goal.status === "COMPLETED" ? "Completed" : goal.status === "IN_PROGRESS" ? "On Track" : "Not Started"}
         </span>
 
         {/* Contribution Score Badge */}

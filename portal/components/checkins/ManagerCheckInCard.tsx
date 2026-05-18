@@ -56,7 +56,7 @@ export function ManagerCheckInCard({ goal, activePeriod, readOnly }: { goal: Goa
         <div className="text-right">
           <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${
             currentCheckIn?.status === "COMPLETED" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
-            currentCheckIn?.status === "ON_TRACK" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" :
+            currentCheckIn?.status === "IN_PROGRESS" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" :
             "bg-zinc-800 text-zinc-400 border border-zinc-700"
           }`}>
             {currentCheckIn?.status?.replace("_", " ") || "NOT STARTED"}
