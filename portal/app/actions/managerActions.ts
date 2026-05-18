@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/authOptions";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function approveGoalSheet(sheetId: string) {
   const session = await getServerSession(authOptions);
@@ -52,6 +52,7 @@ export async function approveGoalSheet(sheetId: string) {
 
     revalidatePath("/manager/review");
     revalidatePath(`/manager/review/${sheetId}`);
+    revalidateTag("analytics", undefined as any);
     return { success: true };
     
   } catch (error) {
@@ -101,6 +102,7 @@ export async function rejectGoalSheet(sheetId: string) {
 
     revalidatePath("/manager/review");
     revalidatePath(`/manager/review/${sheetId}`);
+    revalidateTag("analytics", undefined as any);
     return { success: true };
     
   } catch (error) {
@@ -157,6 +159,7 @@ export async function editGoalDuringReview(goalId: string, updates: { targetValu
     });
 
     revalidatePath(`/manager/review/${goal.sheet.id}`);
+    revalidateTag("analytics", undefined as any);
     return { success: true };
     
   } catch (error) {

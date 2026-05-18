@@ -19,7 +19,16 @@ export async function RecentActivityFeed({ limit = 20, userId }: RecentActivityF
     where,
     orderBy: { createdAt: "desc" },
     take: limit,
-    include: { actor: true }
+    include: {
+      actor: {
+        select: {
+          id: true,
+          name: true,
+          role: true,
+          empId: true
+        }
+      }
+    }
   });
 
   if (rawAudits.length === 0) {
@@ -30,7 +39,7 @@ export async function RecentActivityFeed({ limit = 20, userId }: RecentActivityF
     );
   }
 
-  const grouped = groupAuditsByDate(rawAudits);
+  const grouped = groupAuditsByDate(rawAudits as any);
 
   return (
     <div className="space-y-8">
@@ -41,7 +50,7 @@ export async function RecentActivityFeed({ limit = 20, userId }: RecentActivityF
           </h4>
           
           <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[19px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-zinc-800 before:to-transparent">
-            {grouped[dateGroup].map((audit: AuditWithActor, i: number) => {
+            {grouped[dateGroup].map((audit: any, i: number) => {
               const newValues = audit.newValues as Record<string, any> | null | undefined;
               const { text, icon: Icon, color } = formatAuditAction(audit.action, audit.entityType, audit.newValues);
               

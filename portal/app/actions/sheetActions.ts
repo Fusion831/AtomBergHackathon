@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/authOptions";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function submitGoalSheet(sheetId: string) {
   const session = await getServerSession(authOptions);
@@ -57,6 +57,7 @@ export async function submitGoalSheet(sheetId: string) {
     revalidatePath("/dashboard");
     revalidatePath("/goals/draft");
     revalidatePath("/manager/review");
+    revalidateTag("analytics", undefined as any);
     return { success: true };
     
   } catch (error) {
@@ -100,6 +101,7 @@ export async function requestUnlock(sheetId: string, reason: string) {
 
     revalidatePath("/goals/draft");
     revalidatePath("/dashboard");
+    revalidateTag("analytics", undefined as any);
     return { success: true };
     
   } catch (error) {

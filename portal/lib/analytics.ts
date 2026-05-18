@@ -1,5 +1,6 @@
 import { prisma } from "./prisma";
 import { Role, CheckInPeriod, GoalSheetStatus, GoalStatus, UomType, GoalType } from "@prisma/client";
+import { unstable_cache } from "next/cache";
 
 export interface DepartmentCompletion {
   id: string;
@@ -563,3 +564,24 @@ export async function getEmployeeAnalytics(employeeId: string, cycleId: string, 
     trends
   };
 }
+
+// -----------------------------------------------------------------
+// CACHED ANALYTICS WRAPPERS WITH DYNAMIC KEY PARTS
+// -----------------------------------------------------------------
+export const getCachedAdminAnalytics = (cycleId: string, quarter: CheckInPeriod) => unstable_cache(
+  async () => getAdminAnalytics(cycleId, quarter),
+  ["admin-analytics", cycleId, quarter],
+  { revalidate: 300, tags: ["analytics", `admin-analytics-${cycleId}-${quarter}`] }
+)();
+
+export const getCachedManagerAnalytics = (managerId: string, cycleId: string, quarter: CheckInPeriod) => unstable_cache(
+  async () => getManagerAnalytics(managerId, cycleId, quarter),
+  ["manager-analytics", managerId, cycleId, quarter],
+  { revalidate: 300, tags: ["analytics", `manager-analytics-${managerId}-${cycleId}-${quarter}`] }
+)();
+
+export const getCachedEmployeeAnalytics = (employeeId: string, cycleId: string, quarter: CheckInPeriod) => unstable_cache(
+  async () => getEmployeeAnalytics(employeeId, cycleId, quarter),
+  ["employee-analytics", employeeId, cycleId, quarter],
+  { revalidate: 300, tags: ["analytics", `employee-analytics-${employeeId}-${cycleId}-${quarter}`] }
+)();

@@ -62,16 +62,33 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Pr
     }
   }
 
-  const users = await prisma.user.findMany({
+  const users: any[] = await prisma.user.findMany({
     where: whereClause,
-    include: {
-      department: true,
-      manager: true,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      empId: true,
+      department: {
+        select: { name: true }
+      },
+      manager: {
+        select: { name: true }
+      },
       goalSheets: {
         where: { cycleId: activeCycle?.id, quarter: selectedQuarter },
-        include: {
+        select: {
+          id: true,
+          status: true,
+          quarter: true,
           goals: {
-            include: { checkIns: true }
+            select: {
+              id: true,
+              checkIns: {
+                where: { period: activeCycle?.activeQuarter as any },
+                select: { id: true, period: true }
+              }
+            }
           }
         }
       }
@@ -128,7 +145,7 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Pr
                     if (sheet.status === "LOCKED") {
                       if (activeCycle?.activeQuarter) {
                         const totalGoals = sheet.goals.length;
-                        const updatedGoals = sheet.goals.filter(g => g.checkIns.some(c => c.period === activeCycle.activeQuarter)).length;
+                        const updatedGoals = sheet.goals.filter((g: any) => g.checkIns.some((c: any) => c.period === activeCycle.activeQuarter)).length;
                         if (totalGoals === 0) {
                           statusColor = "bg-zinc-800 text-zinc-400 border border-zinc-750";
                           statusText = "No Goals Defined";

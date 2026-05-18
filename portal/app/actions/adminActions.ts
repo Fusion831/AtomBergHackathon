@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/authOptions";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { CheckInPeriod } from "@prisma/client";
 
 export async function unlockGoalSheet(sheetId: string, reason: string) {
@@ -49,6 +49,7 @@ export async function unlockGoalSheet(sheetId: string, reason: string) {
     });
 
     revalidatePath("/admin/governance");
+    revalidateTag("analytics", undefined as any);
     return { success: true };
   } catch (error) {
     return { success: false, message: "An unexpected error occurred." };
@@ -88,6 +89,7 @@ export async function createGoalCycle(name: string, startDate: Date, endDate: Da
     });
 
     revalidatePath("/admin/governance");
+    revalidateTag("analytics", undefined as any);
     return { success: true };
   } catch (error) {
     return { success: false, message: "Error creating cycle." };
@@ -127,6 +129,7 @@ export async function setActiveCycle(cycleId: string) {
     });
 
     revalidatePath("/admin/governance");
+    revalidateTag("analytics", undefined as any);
     return { success: true };
   } catch (error) {
     return { success: false, message: "Error activating cycle." };
@@ -164,6 +167,7 @@ export async function setActiveQuarter(cycleId: string, quarter: CheckInPeriod |
     // Also revalidate the routes that depend on this
     revalidatePath("/checkins");
     revalidatePath("/manager/checkins");
+    revalidateTag("analytics", undefined as any);
     return { success: true };
   } catch (error) {
     return { success: false, message: "Error setting active quarter." };
@@ -201,6 +205,7 @@ export async function setPlanningQuarter(cycleId: string, quarter: CheckInPeriod
     revalidatePath("/checkins");
     revalidatePath("/manager/checkins");
     revalidatePath("/goals/draft");
+    revalidateTag("analytics", undefined as any);
     return { success: true };
   } catch (error) {
     return { success: false, message: "Error setting planning quarter." };

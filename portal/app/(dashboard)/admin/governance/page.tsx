@@ -37,7 +37,16 @@ export default async function AdminGovernancePage({ searchParams }: { searchPara
       cycleId: activeCycle?.id,
       quarter: selectedQuarter
     },
-    include: { user: true }
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          empId: true
+        }
+      }
+    }
   });
 
   const lockedCount = sheets.filter(s => s.status === "LOCKED" || s.status === "APPROVED").length;
@@ -45,11 +54,20 @@ export default async function AdminGovernancePage({ searchParams }: { searchPara
   const reviewCount = sheets.filter(s => s.status === "UNDER_REVIEW" || s.status === "SUBMITTED").length;
 
   // If in audit tab, fetch all audits
-  let auditLogs: AuditWithActor[] = [];
+  let auditLogs: any[] = [];
   if (currentTab === "audit") {
     auditLogs = await prisma.auditLog.findMany({
       orderBy: { createdAt: "desc" },
-      include: { actor: true },
+      include: {
+        actor: {
+          select: {
+            id: true,
+            name: true,
+            role: true,
+            empId: true
+          }
+        }
+      },
       take: 50
     });
   }

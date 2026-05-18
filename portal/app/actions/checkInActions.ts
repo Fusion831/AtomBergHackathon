@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/authOptions";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { calculateProgressScore, determineStatus } from "@/lib/progress";
 import { CheckInPeriod, GoalStatus } from "@prisma/client";
 
@@ -163,6 +163,7 @@ export async function upsertCheckIn(
     revalidatePath("/checkins");
     revalidatePath("/manager/checkins");
     revalidatePath("/manager/shared-goals");
+    revalidateTag("analytics", undefined as any);
     return { success: true };
 
   } catch (error) {
@@ -208,6 +209,7 @@ export async function addManagerCheckInComment(checkInId: string, managerComment
     });
 
     revalidatePath("/manager/checkins");
+    revalidateTag("analytics", undefined as any);
     return { success: true };
 
   } catch (error) {
