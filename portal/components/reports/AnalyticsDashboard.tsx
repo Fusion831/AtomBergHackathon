@@ -6,6 +6,84 @@ import {
   Hourglass, Building2, ShieldAlert, Award, Calendar, FileSpreadsheet 
 } from "lucide-react";
 import { UomType } from "@prisma/client";
+import { 
+  DepartmentCompletion, 
+  ThrustAreaDistribution, 
+  UomDistribution, 
+  ManagerPerformance, 
+  QoQTrendPoint 
+} from "@/lib/analytics";
+
+export interface MemberProgressItem {
+  id: string;
+  name: string;
+  email: string;
+  empId: string;
+  sheetStatus: string;
+  sheetId: string | null;
+  goalsCount: number;
+  avgProgress: number;
+}
+
+export interface SharedKpiItem {
+  id: string;
+  title: string;
+  targetValue: number | null;
+  uomType: string;
+  cascadeCount: number;
+  avgProgress: number;
+}
+
+export interface FeedbackTimelineItem {
+  id: string;
+  action: string;
+  timestamp: string | Date;
+  reason: string;
+}
+
+export interface SharedKpiAlignmentItem {
+  id: string;
+  title: string;
+  weightage: number;
+  progress: number;
+}
+
+export interface EmployeeAnalyticsData {
+  personalScore: number;
+  goalsCount: number;
+  completedCount: number;
+  onTrackCount: number;
+  notStartedCount: number;
+  managerName: string;
+  managerFeedbackTimeline: FeedbackTimelineItem[];
+  sharedKpiAlignments: SharedKpiAlignmentItem[];
+  trends: QoQTrendPoint[];
+}
+
+export interface AdminAnalyticsData {
+  overallCompletionRate: number;
+  completedCount: number;
+  pendingReviewCount: number;
+  draftCount: number;
+  totalEmployees: number;
+  departmentCompletions: DepartmentCompletion[];
+  thrustAreas: ThrustAreaDistribution[];
+  uomTypes: UomDistribution[];
+  managerPerformances: ManagerPerformance[];
+  trends: QoQTrendPoint[];
+}
+
+export interface ManagerAnalyticsData {
+  teamSize: number;
+  completedSheets: number;
+  submittedSheets: number;
+  draftSheets: number;
+  teamCompletionRate: number;
+  memberProgress: MemberProgressItem[];
+  sharedKpis: SharedKpiItem[];
+  trends: QoQTrendPoint[];
+  personalExecution: EmployeeAnalyticsData;
+}
 
 // -----------------------------------------------------------------
 // SVG Line Chart Component
@@ -205,7 +283,7 @@ export function AnalyticsDashboard({
                   <Building2 size={16} className="text-zinc-400" /> Department Completion Matrix
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {data.departmentCompletions.map((dept: any) => (
+                  {data.departmentCompletions.map((dept: DepartmentCompletion) => (
                     <div key={dept.id} className="p-4 bg-zinc-950 rounded-xl border border-zinc-800/80 flex flex-col justify-between">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-zinc-300 truncate max-w-[150px]">{dept.name}</span>
@@ -232,7 +310,7 @@ export function AnalyticsDashboard({
             <div className="space-y-6">
               <SvgDonutChart 
                 title="Thrust Area Focus" 
-                data={data.thrustAreas.slice(0, 4).map((ta: any, idx: number) => ({
+                data={data.thrustAreas.slice(0, 4).map((ta: ThrustAreaDistribution, idx: number) => ({
                   label: ta.thrustArea,
                   count: ta.count,
                   color: ["#3b82f6", "#10b981", "#f59e0b", "#ec4899"][idx % 4]
@@ -240,7 +318,7 @@ export function AnalyticsDashboard({
               />
               <SvgDonutChart 
                 title="Measurement Units" 
-                data={data.uomTypes.map((u: any, idx: number) => ({
+                data={data.uomTypes.map((u: UomDistribution, idx: number) => ({
                   label: u.uomType.replace('_', ' '),
                   count: u.count,
                   color: ["#8b5cf6", "#6366f1", "#f43f5e", "#14b8a6"][idx % 4]
@@ -267,7 +345,7 @@ export function AnalyticsDashboard({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-800/50">
-                  {data.managerPerformances.map((mgr: any) => (
+                  {data.managerPerformances.map((mgr: ManagerPerformance) => (
                     <tr key={mgr.id} className="hover:bg-zinc-950/40 transition-colors">
                       <td className="py-3 px-4 text-zinc-200 font-medium">{mgr.name}</td>
                       <td className="py-3 px-4 text-zinc-400">{mgr.department}</td>
@@ -383,7 +461,7 @@ export function AnalyticsDashboard({
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-800/50">
-                          {data.memberProgress.map((member: any) => (
+                          {data.memberProgress.map((member: MemberProgressItem) => (
                             <tr key={member.id} className="hover:bg-zinc-950/40 transition-colors">
                               <td className="py-3 px-3 text-zinc-200 font-medium">{member.name}</td>
                               <td className="py-3 px-3 text-zinc-400 font-mono">{member.empId}</td>
@@ -425,7 +503,7 @@ export function AnalyticsDashboard({
                       <p className="text-xs text-zinc-500 text-center py-6">No Master Shared KPIs cascade configured yet.</p>
                     ) : (
                       <div className="space-y-4">
-                        {data.sharedKpis.map((sk: any) => (
+                        {data.sharedKpis.map((sk: SharedKpiItem) => (
                           <div key={sk.id} className="p-4 bg-zinc-950 rounded-xl border border-zinc-850 flex flex-col gap-3">
                             <div>
                               <span className="text-xs font-semibold text-zinc-200">{sk.title}</span>
@@ -461,7 +539,7 @@ export function AnalyticsDashboard({
                     <div className="text-center py-8 text-zinc-500 text-xs">No lifecycle timeline events recorded yet.</div>
                   ) : (
                     <div className="relative border-l border-zinc-800 pl-4 ml-2 space-y-6">
-                      {data.personalExecution.managerFeedbackTimeline.map((item: any) => (
+                      {data.personalExecution.managerFeedbackTimeline.map((item: FeedbackTimelineItem) => (
                         <div key={item.id} className="relative">
                           <span className="absolute -left-[21px] top-1.5 h-2 w-2 rounded-full bg-blue-500 border border-zinc-900"></span>
                           <div className="flex items-center justify-between text-xs text-zinc-400">
@@ -499,7 +577,7 @@ export function AnalyticsDashboard({
                     <p className="text-xs text-zinc-500 text-center py-6">You have no shared KPI contributions currently assigned.</p>
                   ) : (
                     <div className="space-y-3">
-                      {data.personalExecution.sharedKpiAlignments.map((ka: any) => (
+                      {data.personalExecution.sharedKpiAlignments.map((ka: SharedKpiAlignmentItem) => (
                         <div key={ka.id} className="p-3 bg-zinc-950 border border-zinc-850 rounded-xl flex flex-col gap-2">
                           <div className="flex justify-between items-start">
                             <span className="text-xs font-semibold text-zinc-300 line-clamp-1">{ka.title}</span>
@@ -538,7 +616,7 @@ export function AnalyticsDashboard({
                 <div className="text-center py-8 text-zinc-500 text-xs">No lifecycle timeline events recorded yet.</div>
               ) : (
                 <div className="relative border-l border-zinc-800 pl-4 ml-2 space-y-6">
-                  {data.managerFeedbackTimeline.map((item: any) => (
+                  {data.managerFeedbackTimeline.map((item: FeedbackTimelineItem) => (
                     <div key={item.id} className="relative">
                       <span className="absolute -left-[21px] top-1.5 h-2 w-2 rounded-full bg-blue-500 border border-zinc-900"></span>
                       <div className="flex items-center justify-between text-xs text-zinc-400">
@@ -576,7 +654,7 @@ export function AnalyticsDashboard({
                 <p className="text-xs text-zinc-500 text-center py-6">You have no shared KPI contributions currently assigned.</p>
               ) : (
                 <div className="space-y-3">
-                  {data.sharedKpiAlignments.map((ka: any) => (
+                  {data.sharedKpiAlignments.map((ka: SharedKpiAlignmentItem) => (
                     <div key={ka.id} className="p-3 bg-zinc-950 border border-zinc-850 rounded-xl flex flex-col gap-2">
                       <div className="flex justify-between items-start">
                         <span className="text-xs font-semibold text-zinc-300 line-clamp-1">{ka.title}</span>

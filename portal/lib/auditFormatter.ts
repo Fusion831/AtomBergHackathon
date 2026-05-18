@@ -1,5 +1,8 @@
 import { format, isToday, isYesterday } from "date-fns";
 import { FileText, CheckCircle, XCircle, Unlock, Play, GitBranch, Target, Settings, Activity } from "lucide-react";
+import { AuditLog, User } from "@prisma/client";
+
+export type AuditWithActor = AuditLog & { actor?: User };
 
 export interface FormattedAudit {
   id: string;
@@ -56,9 +59,9 @@ export function formatAuditTimestamp(date: Date) {
   return format(date, 'MMM d, yyyy');
 }
 
-export function groupAuditsByDate(audits: any[]) {
-  const groups: { [key: string]: any[] } = {};
-  audits.forEach(audit => {
+export function groupAuditsByDate(audits: AuditWithActor[]) {
+  const groups: { [key: string]: AuditWithActor[] } = {};
+  audits.forEach((audit: AuditWithActor) => {
     let dateStr = "Older";
     if (isToday(audit.createdAt)) dateStr = "Today";
     else if (isYesterday(audit.createdAt)) dateStr = "Yesterday";

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { formatAuditAction, formatAuditTimestamp, groupAuditsByDate } from "@/lib/auditFormatter";
+import { formatAuditAction, formatAuditTimestamp, groupAuditsByDate, AuditWithActor } from "@/lib/auditFormatter";
 
 interface RecentActivityFeedProps {
   limit?: number;
@@ -41,7 +41,8 @@ export async function RecentActivityFeed({ limit = 20, userId }: RecentActivityF
           </h4>
           
           <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[19px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-zinc-800 before:to-transparent">
-            {grouped[dateGroup].map((audit: any, i: number) => {
+            {grouped[dateGroup].map((audit: AuditWithActor, i: number) => {
+              const newValues = audit.newValues as Record<string, any> | null | undefined;
               const { text, icon: Icon, color } = formatAuditAction(audit.action, audit.entityType, audit.newValues);
               
               return (
@@ -56,13 +57,13 @@ export async function RecentActivityFeed({ limit = 20, userId }: RecentActivityF
                     <div className="flex justify-between items-start gap-4">
                       <div>
                         <p className="text-sm text-zinc-300">
-                          <span className="font-medium text-zinc-100">{audit.actor.name}</span> {text}
+                          <span className="font-medium text-zinc-100">{audit.actor?.name || "System"}</span> {text}
                         </p>
                         {audit.entityType === "GoalSheet" && (
                           <p className="text-xs text-zinc-500 mt-1">Target: Goal Sheet</p>
                         )}
-                        {audit.entityType === "Goal" && audit.newValues?.title && (
-                          <p className="text-xs text-zinc-500 mt-1">Goal: {audit.newValues.title}</p>
+                        {audit.entityType === "Goal" && newValues?.title && (
+                          <p className="text-xs text-zinc-500 mt-1">Goal: {newValues.title}</p>
                         )}
                       </div>
                       <span className="text-xs text-zinc-500 whitespace-nowrap">

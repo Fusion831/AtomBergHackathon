@@ -7,7 +7,8 @@ import { CycleManagement } from "@/components/admin/CycleManagement";
 import { UnlockModal } from "@/components/admin/UnlockModal";
 import { Users, FileText, Lock, Calendar, Activity, CheckCircle, XCircle, Unlock, ArrowRight } from "lucide-react";
 import { RecentActivityFeed } from "@/components/audit/RecentActivityFeed";
-import { formatAuditAction, formatAuditTimestamp } from "@/lib/auditFormatter";
+import { formatAuditAction, formatAuditTimestamp, AuditWithActor } from "@/lib/auditFormatter";
+import { CheckInPeriod } from "@prisma/client";
 
 export default async function AdminGovernancePage({ searchParams }: { searchParams: Promise<{ tab?: string; quarter?: string }> }) {
   const session = await getServerSession(authOptions);
@@ -24,7 +25,7 @@ export default async function AdminGovernancePage({ searchParams }: { searchPara
   });
 
   const activeCycle = cycles.find((c: { isActive: boolean }) => c.isActive);
-  const selectedQuarter = (resolvedParams.quarter || activeCycle?.activeQuarter || "Q2") as any;
+  const selectedQuarter = (resolvedParams.quarter || activeCycle?.activeQuarter || "Q2") as CheckInPeriod;
 
   // Fetch overall completion metrics
   const totalEmployees = await prisma.user.count({
@@ -44,7 +45,7 @@ export default async function AdminGovernancePage({ searchParams }: { searchPara
   const reviewCount = sheets.filter(s => s.status === "UNDER_REVIEW" || s.status === "SUBMITTED").length;
 
   // If in audit tab, fetch all audits
-  let auditLogs: any[] = [];
+  let auditLogs: AuditWithActor[] = [];
   if (currentTab === "audit") {
     auditLogs = await prisma.auditLog.findMany({
       orderBy: { createdAt: "desc" },
@@ -231,7 +232,7 @@ export default async function AdminGovernancePage({ searchParams }: { searchPara
                       <td colSpan={6} className="py-12 text-center text-zinc-500 font-medium">No audit logs recorded yet.</td>
                     </tr>
                   ) : (
-                    auditLogs.map((audit) => {
+                    auditLogs.map((audit: AuditWithActor) => {
                       const { text, icon: Icon, color } = formatAuditAction(audit.action, audit.entityType, audit.newValues);
                       
                       return (
@@ -241,8 +242,8 @@ export default async function AdminGovernancePage({ searchParams }: { searchPara
                           </td>
                           <td className="py-4 px-4 font-medium text-zinc-200">
                             <div>
-                              <span>{audit.actor.name}</span>
-                              <span className="block text-[10px] text-zinc-500 font-mono tracking-tighter uppercase">{audit.actor.role}</span>
+                              <span>{audit.actor?.name || "System"}</span>
+                              <span className="block text-[10px] text-zinc-500 font-mono tracking-tighter uppercase">{audit.actor?.role || "SYSTEM"}</span>
                             </div>
                           </td>
                           <td className="py-4 px-4">

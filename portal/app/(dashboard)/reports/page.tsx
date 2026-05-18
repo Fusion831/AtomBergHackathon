@@ -4,7 +4,12 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ReportsFilters } from "@/components/reports/ReportsFilters";
-import { AnalyticsDashboard } from "@/components/reports/AnalyticsDashboard";
+import { 
+  AnalyticsDashboard, 
+  AdminAnalyticsData, 
+  ManagerAnalyticsData, 
+  EmployeeAnalyticsData 
+} from "@/components/reports/AnalyticsDashboard";
 import { 
   getAdminAnalytics, 
   getManagerAnalytics, 
@@ -42,7 +47,7 @@ export default async function ReportsPage({
 
   // 2. Fetch role-scoped analytics data
   const activeQuarter = activeCycle.activeQuarter || "Q2";
-  let analyticsData: any = null;
+  let analyticsData: AdminAnalyticsData | ManagerAnalyticsData | EmployeeAnalyticsData | null = null;
 
   try {
     if (session.user.role === "ADMIN") {

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/authOptions";
 import { prisma } from "@/lib/prisma";
-import { CheckInPeriod } from "@prisma/client";
+import { CheckInPeriod, Prisma } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
   const isAdmin = session.user.role === "ADMIN";
 
   // Build the where clause for users
-  const userWhere: any = {};
+  const userWhere: Prisma.UserWhereInput = {};
   if (!isAdmin) {
     userWhere.managerId = session.user.id;
   } else {
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     if (managerId) userWhere.managerId = managerId;
   }
 
-  const sheetWhere: any = { cycleId };
+  const sheetWhere: Prisma.GoalSheetWhereInput = { cycleId };
   if (period && period !== "ALL") {
     sheetWhere.quarter = period;
   }

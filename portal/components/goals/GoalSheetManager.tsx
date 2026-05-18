@@ -1,6 +1,6 @@
 "use client";
 
-import { GoalSheet, Goal } from "@prisma/client";
+import { GoalSheet, Goal, CheckIn, CheckInPeriod } from "@prisma/client";
 import { useTransition, useState } from "react";
 import { submitGoalSheet, requestUnlock } from "@/app/actions/sheetActions";
 import { WeightageProgress } from "@/components/goals/WeightageProgress";
@@ -8,10 +8,10 @@ import { GoalForm } from "@/components/goals/GoalForm";
 import { GoalList } from "@/components/goals/GoalList";
 import { Plus, AlertTriangle, Unlock } from "lucide-react";
 import { CheckInCard } from "@/components/checkins/CheckInCard";
-import { CheckInPeriod } from "@prisma/client";
 import Link from "next/link";
 
-type SheetWithGoals = GoalSheet & { goals: any[] };
+type GoalWithCheckIns = Goal & { checkIns: CheckIn[] };
+type SheetWithGoals = GoalSheet & { goals: GoalWithCheckIns[] };
 
 export function GoalSheetManager({ 
   sheet, 
@@ -72,7 +72,7 @@ export function GoalSheetManager({
     let totalWeightage = 0;
     
     sheet.goals.forEach(goal => {
-      const checkIn = goal.checkIns?.find((c: any) => c.period === sheet.quarter);
+      const checkIn = goal.checkIns?.find((c: CheckIn) => c.period === sheet.quarter);
       const score = checkIn 
         ? (checkIn.progressScore ?? 0) 
         : (goal.status === "COMPLETED" ? 100 : (goal.status === "ON_TRACK" ? 75 : 0));

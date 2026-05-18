@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Search, Filter, ChevronRight, User as UserIcon } from "lucide-react";
 import { DirectoryFilters } from "@/components/directory/DirectoryFilters";
+import { CheckInPeriod, Prisma, GoalSheetStatus } from "@prisma/client";
 
 export default async function DirectoryPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string; departmentId?: string; managerId?: string; quarter?: string }> }) {
   const session = await getServerSession(authOptions);
@@ -16,10 +17,10 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Pr
   const isAdmin = session.user.role === "ADMIN";
   const activeCycle = await prisma.goalCycle.findFirst({ where: { isActive: true } });
   
-  const selectedQuarter = (resolvedParams.quarter || activeCycle?.activeQuarter || "Q2") as any;
+  const selectedQuarter = (resolvedParams.quarter || activeCycle?.activeQuarter || "Q2") as CheckInPeriod;
 
   // Base where clause. If not admin, restrict to team members
-  const whereClause: any = {};
+  const whereClause: Prisma.UserWhereInput = {};
   
   if (!isAdmin) {
     whereClause.managerId = session.user.id;
@@ -55,7 +56,7 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Pr
         some: {
           cycleId: activeCycle.id,
           quarter: selectedQuarter,
-          status: resolvedParams.status
+          status: resolvedParams.status as GoalSheetStatus
         }
       };
     }
