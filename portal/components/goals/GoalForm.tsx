@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { saveGoal } from "@/app/actions/goalActions";
 import { useTransition } from "react";
-import { Users } from "lucide-react";
+import { Users, Info, Settings2 } from "lucide-react";
 
 interface GoalFormProps {
   sheetId: string;
@@ -47,107 +47,118 @@ export function GoalForm({ sheetId, initialData, onSuccess, onCancel }: GoalForm
   const uom = form.watch("uomType");
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className={`flex flex-col gap-5 p-6 bg-zinc-950 border ${isShared ? 'border-blue-500/30' : 'border-zinc-800'} rounded-xl relative`}>
+    <form onSubmit={form.handleSubmit(onSubmit)} className={`flex flex-col gap-6 p-6 bg-zinc-950 border ${isShared ? 'border-violet-500/20 bg-violet-950/5' : 'border-zinc-900'} rounded-2xl relative shadow-2xl select-none`}>
       <div className="space-y-1">
-        <h2 className="text-lg font-medium text-blue-400">
-          {initialData ? (isShared ? "Adjust Shared KPI Weightage" : "Edit Goal") : "Draft New Goal"}
+        <h2 className="text-base font-bold text-zinc-100 flex items-center gap-2">
+          <Settings2 size={18} className="text-blue-400" />
+          {initialData ? (isShared ? "Calibrate Cascaded Goal Contribution" : "Modify Goal Details") : "Draft New Performance Goal"}
         </h2>
         {isShared ? (
-          <p className="text-sm text-blue-400/80 flex items-center gap-1.5 mt-1">
-            <Users size={14} /> This is a shared departmental goal. You can only adjust its weightage.
+          <p className="text-xs text-violet-400 flex items-center gap-1.5 mt-1 bg-violet-500/5 px-2.5 py-1.5 border border-violet-500/15 rounded-lg leading-relaxed">
+            <Users size={12} className="shrink-0" /> Shared corporate initiative. Goal parameters are locked by alignment; you only specify your local plan contribution.
           </p>
         ) : (
-          <p className="text-sm text-zinc-400">Define your objective and how you'll measure success.</p>
+          <p className="text-xs text-zinc-500 leading-relaxed">Specify goal dimensions, align with a performance area, and choose evaluation parameters.</p>
         )}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="flex flex-col gap-2 md:col-span-2">
-          <label className="text-sm font-medium text-zinc-300">Goal Title</label>
-          <input 
-            {...form.register("title")}
-            disabled={isShared}
-            className="px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-md text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-            placeholder="e.g., Increase Q3 Sales Revenue" 
-          />
-          {form.formState.errors.title && <span className="text-xs text-rose-400">{form.formState.errors.title.message}</span>}
+      <div className="space-y-4">
+        {/* Step 1: Descriptive Inputs */}
+        <div className="space-y-3.5">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-zinc-350">Goal Name</label>
+            <input 
+              {...form.register("title")}
+              disabled={isShared}
+              className="px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-zinc-200 placeholder:text-zinc-650 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed" 
+              placeholder="e.g. Sales Quarter Target Expansion" 
+            />
+            {form.formState.errors.title && <span className="text-[10px] font-semibold text-rose-450">{form.formState.errors.title.message}</span>}
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-zinc-350">Description</label>
+            <textarea 
+              {...form.register("description")}
+              disabled={isShared}
+              className="px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-zinc-200 placeholder:text-zinc-650 focus:outline-none focus:ring-1 focus:ring-blue-500 h-16 resize-none disabled:opacity-50 disabled:cursor-not-allowed leading-relaxed" 
+              placeholder="Clarify specific operational outcomes and actions involved..." 
+            />
+          </div>
         </div>
 
-        <div className="flex flex-col gap-2 md:col-span-2">
-          <label className="text-sm font-medium text-zinc-300">Description (Optional)</label>
-          <textarea 
-            {...form.register("description")}
-            disabled={isShared}
-            className="px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-md text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-500 h-20 resize-none disabled:opacity-50 disabled:cursor-not-allowed" 
-            placeholder="Provide clarity on how this will be achieved..." 
-          />
+        {/* Step 2: Alignment & Contribution */}
+        <div className="grid gap-4 grid-cols-2 p-4 bg-zinc-900/30 border border-zinc-900 rounded-xl">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-zinc-350">Thrust Area</label>
+            <select 
+              {...form.register("thrustArea")}
+              disabled={isShared}
+              className="px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-zinc-200 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            >
+              <option value="">Align category...</option>
+              <option value="Financial">Financial Performance</option>
+              <option value="Customer">Customer Satisfaction</option>
+              <option value="Process">Operational Excellence</option>
+              <option value="People">People & Culture</option>
+            </select>
+            {form.formState.errors.thrustArea && <span className="text-[10px] font-semibold text-rose-450">{form.formState.errors.thrustArea.message}</span>}
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-amber-500">Contribution (%) *</label>
+            <input 
+              type="number"
+              {...form.register("weightage")}
+              className="px-3 py-2.5 bg-zinc-900 border border-amber-500/25 rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-amber-500/50 font-mono" 
+              placeholder="min 10%" 
+            />
+            {form.formState.errors.weightage && <span className="text-[10px] font-semibold text-rose-450">{form.formState.errors.weightage.message}</span>}
+          </div>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-zinc-300">Thrust Area</label>
-          <select 
-            {...form.register("thrustArea")}
-            disabled={isShared}
-            className="px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-md text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <option value="">Select an area...</option>
-            <option value="Financial">Financial Performance</option>
-            <option value="Customer">Customer Satisfaction</option>
-            <option value="Process">Operational Excellence</option>
-            <option value="People">People & Culture</option>
-          </select>
-          {form.formState.errors.thrustArea && <span className="text-xs text-rose-400">{form.formState.errors.thrustArea.message}</span>}
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-amber-400">Weightage (%) *</label>
-          <input 
-            type="number"
-            {...form.register("weightage")}
-            className="px-3 py-2 bg-zinc-900 border border-amber-500/30 rounded-md text-sm text-zinc-100 focus:outline-none focus:border-amber-500" 
-            placeholder="min 10%" 
-          />
-          {form.formState.errors.weightage && <span className="text-xs text-rose-400">{form.formState.errors.weightage.message}</span>}
-        </div>
-
-        <div className="md:col-span-2 mt-4 pt-4 border-t border-zinc-800/80">
-          <h3 className="text-sm font-medium text-zinc-100 mb-4">Measurement Configuration</h3>
-          <div className="grid gap-4 md:grid-cols-2 p-4 bg-zinc-900/50 rounded-xl border border-zinc-800/50">
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-medium text-zinc-400">Unit of Measure (UoM)</label>
+        {/* Step 3: Success Metrics */}
+        <div className="mt-4 pt-4 border-t border-zinc-900/60">
+          <div className="flex items-center gap-1.5 mb-3">
+            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Success Metrics</h3>
+            <Info size={12} className="text-zinc-650" />
+          </div>
+          <div className="grid gap-3.5 md:grid-cols-2 p-4 bg-zinc-900/20 border border-zinc-900 rounded-xl">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Unit of Measure (UoM)</label>
               <select 
                 {...form.register("uomType")}
                 disabled={isShared}
-                className="px-3 py-2 bg-zinc-900 border border-zinc-700/50 rounded-md text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-zinc-200 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                <option value="NUMERIC">Numeric</option>
-                <option value="PERCENTAGE">Percentage</option>
-                <option value="TIMELINE">Timeline / Date</option>
-                <option value="ZERO_BASED">Zero-Based (Defect rate)</option>
+                <option value="NUMERIC">Numeric Value</option>
+                <option value="PERCENTAGE">Percentage (%)</option>
+                <option value="TIMELINE">Timeline / Target Date</option>
+                <option value="ZERO_BASED">Zero-Based (Defect minimization)</option>
               </select>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-medium text-zinc-400">Metric Direction</label>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Metric Direction</label>
               <select 
                 {...form.register("metricDirection")}
                 disabled={isShared}
-                className="px-3 py-2 bg-zinc-900 border border-zinc-700/50 rounded-md text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-zinc-200 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                <option value="HIGHER_IS_BETTER">Higher is Better (e.g., Revenue)</option>
-                <option value="LOWER_IS_BETTER">Lower is Better (e.g., Error Rate)</option>
+                <option value="HIGHER_IS_BETTER">Higher is Better (e.g. Performance Increase)</option>
+                <option value="LOWER_IS_BETTER">Lower is Better (e.g. Error Rate Decline)</option>
               </select>
             </div>
 
             {uom !== "TIMELINE" && (
-              <div className="flex flex-col gap-2 md:col-span-2">
-                <label className="text-xs font-medium text-zinc-400">Target Value</label>
+              <div className="flex flex-col gap-1.5 md:col-span-2">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Target Threshold</label>
                 <input 
                   type="number" step="any"
                   {...form.register("targetValue")}
                   disabled={isShared}
-                  className="px-3 py-2 bg-zinc-900 border border-zinc-700/50 rounded-md text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-                  placeholder="Target amount..." 
+                  className="px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-zinc-200 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed font-mono" 
+                  placeholder="e.g. 100000" 
                 />
               </div>
             )}
@@ -155,16 +166,16 @@ export function GoalForm({ sheetId, initialData, onSuccess, onCancel }: GoalForm
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-zinc-800">
+      <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-zinc-900/60">
         {onCancel && (
-          <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-medium text-zinc-300 hover:text-white transition-colors">
+          <button type="button" onClick={onCancel} className="px-4 py-2 text-xs font-semibold text-zinc-500 hover:text-zinc-350 transition-colors">
             Cancel
           </button>
         )}
         <button 
           type="submit" 
           disabled={isPending}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-md transition-colors"
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold rounded-lg transition-all duration-200 active:scale-[0.98] shadow-lg shadow-blue-900/20"
         >
           {isPending ? "Saving..." : initialData ? "Update Goal" : "Add Goal"}
         </button>

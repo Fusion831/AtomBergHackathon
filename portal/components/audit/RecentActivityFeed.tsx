@@ -11,7 +11,6 @@ export async function RecentActivityFeed({ limit = 20, userId }: RecentActivityF
   if (userId) {
     where.OR = [
       { actorId: userId },
-      // Optional: Could expand to filter by entityId if we know the user's sheet ID
     ];
   }
 
@@ -33,8 +32,8 @@ export async function RecentActivityFeed({ limit = 20, userId }: RecentActivityF
 
   if (rawAudits.length === 0) {
     return (
-      <div className="p-8 text-center text-zinc-500 bg-zinc-900/20 border border-zinc-800/80 border-dashed rounded-xl">
-        No recent activity found.
+      <div className="p-8 text-center text-zinc-550 bg-zinc-950/20 border border-zinc-900 border-dashed rounded-xl select-none text-xs italic">
+        No operational ledger logs recorded.
       </div>
     );
   }
@@ -42,43 +41,39 @@ export async function RecentActivityFeed({ limit = 20, userId }: RecentActivityF
   const grouped = groupAuditsByDate(rawAudits as any);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 select-none">
       {Object.keys(grouped).map((dateGroup, groupIdx) => (
-        <div key={dateGroup} className="relative">
-          <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-4 sticky top-0 bg-zinc-950/80 backdrop-blur py-2 z-10">
+        <div key={dateGroup} className="space-y-3">
+          <h4 className="text-[9px] font-bold text-zinc-550 uppercase tracking-widest border-b border-zinc-950 pb-1.5 mb-2.5">
             {dateGroup}
           </h4>
           
-          <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[19px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-zinc-800 before:to-transparent">
-            {grouped[dateGroup].map((audit: any, i: number) => {
+          <div className="flex flex-col gap-2">
+            {grouped[dateGroup].map((audit: any) => {
               const newValues = audit.newValues as Record<string, any> | null | undefined;
               const { text, icon: Icon, color } = formatAuditAction(audit.action, audit.entityType, audit.newValues);
               
               return (
-                <div key={audit.id} className="relative flex items-start group">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full border-[3px] border-zinc-950 bg-zinc-900 z-10 shrink-0 shadow-sm mr-4 ml-0 md:mx-auto md:w-10">
-                    <div className={`p-1.5 rounded-full ${color}`}>
-                      <Icon size={14} />
-                    </div>
+                <div key={audit.id} className="flex items-start gap-3 p-3 bg-zinc-950/15 hover:bg-zinc-900/10 border border-zinc-900/60 rounded-xl transition-all shadow-sm">
+                  <div className={`p-1.5 rounded-lg ${color} shrink-0 mt-0.5`}>
+                    <Icon size={12} />
                   </div>
                   
-                  <div className="flex-1 min-w-0 bg-zinc-900/50 hover:bg-zinc-800/50 transition-colors border border-zinc-800/80 rounded-xl p-4 mt-1 mb-2 shadow-sm">
-                    <div className="flex justify-between items-start gap-4">
-                      <div>
-                        <p className="text-sm text-zinc-300">
-                          <span className="font-medium text-zinc-100">{audit.actor?.name || "System"}</span> {text}
-                        </p>
-                        {audit.entityType === "GoalSheet" && (
-                          <p className="text-xs text-zinc-500 mt-1">Target: Goal Sheet</p>
-                        )}
-                        {audit.entityType === "Goal" && newValues?.title && (
-                          <p className="text-xs text-zinc-500 mt-1">Goal: {newValues.title}</p>
-                        )}
-                      </div>
-                      <span className="text-xs text-zinc-500 whitespace-nowrap">
-                        {formatAuditTimestamp(audit.createdAt)}
-                      </span>
+                  <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-1">
+                    <div className="min-w-0">
+                      <p className="text-xs text-zinc-300 font-semibold leading-relaxed">
+                        <span className="text-zinc-150 font-bold">{audit.actor?.name || "System"}</span> {text}
+                      </p>
+                      {audit.entityType === "GoalSheet" && (
+                        <p className="text-[10px] text-zinc-550 font-bold uppercase tracking-wider mt-0.5">Target: Quarter Plan</p>
+                      )}
+                      {audit.entityType === "Goal" && newValues?.title && (
+                        <p className="text-[10px] text-zinc-550 font-bold uppercase tracking-wider mt-0.5">Goal: {newValues.title}</p>
+                      )}
                     </div>
+                    <span className="text-[10px] font-mono text-zinc-650 shrink-0 font-bold md:text-right">
+                      {formatAuditTimestamp(audit.createdAt)}
+                    </span>
                   </div>
                 </div>
               );

@@ -38,10 +38,10 @@ export default async function ReportsPage({
 
   if (!activeCycle) {
     return (
-      <div className="max-w-4xl mx-auto py-12 px-4 text-center">
-        <AlertTriangle size={48} className="text-amber-500 mx-auto mb-4" />
-        <h2 className="text-xl font-semibold text-zinc-200">No Active Goal Cycle</h2>
-        <p className="text-zinc-500 text-sm mt-2">Please contact an administrator to activate a performance cycle.</p>
+      <div className="max-w-4xl mx-auto py-12 px-4 text-center select-none">
+        <AlertTriangle size={48} className="text-amber-500 mx-auto mb-4 animate-pulse" />
+        <h2 className="text-sm font-bold text-zinc-300">No Active Performance Cycle</h2>
+        <p className="text-xs text-zinc-550 mt-2">Please contact an operations administrator to activate an active performance cycle.</p>
       </div>
     );
   }
@@ -67,35 +67,35 @@ export default async function ReportsPage({
   // Enforce security for exports
   const activeTab = isAdminOrManager ? currentTab : "insights";
 
-  // Cycle filters (for reports filters panel)
+  // Cycle filters
   const cycles = await prisma.goalCycle.findMany({ orderBy: { startDate: "desc" } });
   const departments = session.user.role === "ADMIN" ? await prisma.department.findMany() : [];
   const managers = session.user.role === "ADMIN" ? await prisma.user.findMany({ where: { role: "MANAGER" } }) : [];
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 space-y-8 pb-24">
-      {/* Premium Title Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800 pb-6">
+    <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 space-y-8 pb-24 select-none">
+      {/* Title Header - quiet, premium, executive layout */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-900 pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">
-              {session.user.role === "EMPLOYEE" ? "Personal Insights" : "Executive Insights & Reports"}
+            <h1 className="text-2xl font-bold text-zinc-150 tracking-tight">
+              {session.user.role === "EMPLOYEE" ? "Performance Insights" : "Organization Reports"}
             </h1>
             {session.user.role === "EMPLOYEE" && (
-              <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-bold uppercase rounded flex items-center gap-1">
-                <Sparkles size={10} /> Career Growth
+              <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[9px] font-bold uppercase rounded-md flex items-center gap-1">
+                <Sparkles size={10} /> Insights
               </span>
             )}
           </div>
-          <p className="text-sm text-zinc-400 mt-1">
+          <p className="text-xs text-zinc-550 mt-1 max-w-xl leading-relaxed">
             {session.user.role === "EMPLOYEE" 
-              ? "Track your goals progression, contributions, and timeline updates."
-              : `Real-time analytics and achievement reporting for ${activeCycle.name}.`
+              ? "Review your personal achievements, active quarter updates, and success metrics."
+              : `Real-time organizational compliance and objective performance analytics for ${activeCycle.name}.`
             }
           </p>
         </div>
-        <div className="p-3 bg-blue-500/10 text-blue-400 rounded-xl shrink-0">
-          <BarChart3 size={24} />
+        <div className="p-2.5 bg-blue-500/10 text-blue-450 border border-blue-500/20 rounded-xl shrink-0">
+          <BarChart3 size={20} />
         </div>
       </div>
 
@@ -106,12 +106,15 @@ export default async function ReportsPage({
           <AnalyticsDashboard role={session.user.role as "ADMIN" | "MANAGER" | "EMPLOYEE"} data={analyticsData} />
         }
         exportsContent={
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl animate-in fade-in-50 duration-300">
-            <div className="p-5 border-b border-zinc-800/80">
-              <h2 className="text-lg font-medium text-zinc-100">Achievement Report</h2>
-              <p className="text-sm text-zinc-400 mt-1">Export employee goal progression, actuals, and scores based on specific timelines and metrics.</p>
+          <div className="bg-zinc-950/20 border border-zinc-900 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in-50 duration-300">
+            <div className="p-5 border-b border-zinc-900">
+              <h2 className="text-sm font-bold text-zinc-200 flex items-center gap-2">
+                <FileSpreadsheet size={16} className="text-emerald-450" />
+                Consensus & Alignment Export
+              </h2>
+              <p className="text-xs text-zinc-500 mt-1">Generate filtered spreadsheet archives detailing alignment metrics, actuals, and finalized outcomes.</p>
             </div>
-            <div className="p-6 bg-zinc-900/50">
+            <div className="p-6 bg-zinc-950/10">
               <ReportsFilters 
                 isAdmin={session.user.role === "ADMIN"} 
                 cycles={cycles} 
@@ -129,7 +132,7 @@ export default async function ReportsPage({
 // Fallback error alert helper
 function AlertTriangle({ size, className }: { size?: number; className?: string }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <svg xmlns="http://www.w3.org/2500/svg" width={size || 24} height={size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
       <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
       <line x1="12" y1="9" x2="12" y2="13"/>
       <line x1="12" y1="17" x2="12.01" y2="17"/>

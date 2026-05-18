@@ -40,17 +40,17 @@ export function Sidebar({ user, activeQuarter, planningQuarter }: SidebarProps) 
 
   const navItems = {
     workspace: [
-      { label: "Goals Workspace", href: "/goals/draft", icon: FileText },
-      { label: "My Check-ins", href: "/checkins", icon: Activity },
-      { label: "Personal Insights", href: "/reports", icon: TrendingUp },
+      { label: "Quarter Plan", href: "/goals/draft", icon: FileText },
+      { label: "Performance Updates", href: "/checkins", icon: Activity },
+      { label: "Performance Insights", href: "/reports", icon: TrendingUp },
     ],
     governance: [
-      { label: "Employee Reviews", href: "/manager/review", icon: CheckCircle },
-      { label: "Team Check-ins", href: "/manager/checkins", icon: Users },
-      { label: "Shared KPIs", href: "/manager/shared-goals", icon: Target },
+      { label: "Manager Approvals", href: "/manager/review", icon: CheckCircle },
+      { label: "Team Performance Updates", href: "/manager/checkins", icon: Users },
+      { label: "Cascaded Team Goals", href: "/manager/shared-goals", icon: Target },
     ],
     admin: [
-      { label: "System Governance", href: "/admin/governance", icon: Lock },
+      { label: "Operations Center", href: "/admin/governance", icon: Lock },
       { label: "Directory", href: "/directory", icon: Compass },
     ]
   };
@@ -92,7 +92,7 @@ export function Sidebar({ user, activeQuarter, planningQuarter }: SidebarProps) 
       <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-zinc-900">
         {/* Workspace Section */}
         <div className="space-y-1.5">
-          <div className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider px-3 mb-2">My Workspace</div>
+          <div className="text-[10px] font-bold text-zinc-650 uppercase tracking-wider px-3 mb-2">My Work</div>
           {navItems.workspace.map((item) => {
             const Active = isActive(item.href);
             const Icon = item.icon;
@@ -117,7 +117,7 @@ export function Sidebar({ user, activeQuarter, planningQuarter }: SidebarProps) 
         {/* Team Governance Section */}
         {isManagerOrAdmin && (
           <div className="space-y-1.5 pt-4 border-t border-zinc-900">
-            <div className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider px-3 mb-2">Team Governance</div>
+            <div className="text-[10px] font-bold text-zinc-650 uppercase tracking-wider px-3 mb-2">Team Leadership</div>
             {navItems.governance.map((item) => {
               const Active = isActive(item.href);
               const Icon = item.icon;
@@ -143,7 +143,7 @@ export function Sidebar({ user, activeQuarter, planningQuarter }: SidebarProps) 
         {/* Administration Section */}
         {isAdmin && (
           <div className="space-y-1.5 pt-4 border-t border-zinc-900">
-            <div className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider px-3 mb-2">Administration</div>
+            <div className="text-[10px] font-bold text-zinc-650 uppercase tracking-wider px-3 mb-2">Operations Control</div>
             {navItems.admin.map((item) => {
               const Active = isActive(item.href);
               const Icon = item.icon;

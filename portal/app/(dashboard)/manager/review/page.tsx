@@ -3,7 +3,7 @@ import { authOptions } from "@/lib/auth/authOptions";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, Activity } from "lucide-react";
+import { ChevronRight, Activity, CheckCircle, Clock, Calendar, AlertTriangle } from "lucide-react";
 import { RecentActivityFeed } from "@/components/audit/RecentActivityFeed";
 
 export default async function ManagerReviewPage() {
@@ -34,103 +34,127 @@ export default async function ManagerReviewPage() {
   const draftSheets = sheets.filter(s => s.status === "DRAFT");
 
   return (
-    <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6">
-      <div className="mb-8 border-b border-zinc-800 pb-6 flex items-center justify-between">
+    <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 select-none">
+      {/* Header section with refined naming */}
+      <div className="mb-8 border-b border-zinc-900 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-zinc-100 tracking-tight">Team Goal Reviews</h1>
-          <p className="text-sm text-zinc-400 mt-1">Review and approve your team's submitted goal sheets.</p>
+          <h1 className="text-2xl font-bold text-zinc-150 tracking-tight flex items-center gap-2">
+            <CheckCircle size={22} className="text-emerald-450" />
+            Manager Approvals
+          </h1>
+          <p className="text-xs text-zinc-500 mt-1">Review, calibrate, and authorize upcoming plans proposed by your team.</p>
         </div>
-        <div className="px-4 py-1.5 bg-zinc-900 border border-zinc-800 rounded-md">
-          <span className="text-sm font-medium text-zinc-300">Pending Approvals: {pendingSheets.length}</span>
+        <div className="flex gap-3">
+          <div className="px-3.5 py-1.5 bg-zinc-950 border border-zinc-900 rounded-lg flex items-center gap-2">
+            <Clock size={14} className="text-amber-500" />
+            <span className="text-xs font-bold text-zinc-400">Pending Actions: {pendingSheets.length}</span>
+          </div>
+          <div className="px-3.5 py-1.5 bg-zinc-950 border border-zinc-900 rounded-lg flex items-center gap-2">
+            <Calendar size={14} className="text-blue-500" />
+            <span className="text-xs font-bold text-zinc-400">Planning: {draftSheets.length}</span>
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
+          
+          {/* Action Required Section */}
           <div className="space-y-4">
-            <h2 className="text-lg font-medium text-zinc-100 mb-4">Pending Your Review</h2>
+            <h2 className="text-xs font-bold text-zinc-450 uppercase tracking-wider mb-3">Awaiting My Authorization</h2>
             {pendingSheets.length === 0 ? (
-              <div className="text-center py-12 bg-zinc-900/20 border border-zinc-800 border-dashed rounded-xl">
-                <h3 className="text-zinc-300 font-medium">All caught up</h3>
-                <p className="text-zinc-500 text-sm mt-1">No goal sheets are currently pending your approval.</p>
+              <div className="text-center py-10 bg-zinc-950/20 border border-zinc-900 border-dashed rounded-xl select-none">
+                <h3 className="text-xs font-bold text-zinc-400">All Captured & Authorized</h3>
+                <p className="text-xs text-zinc-650 mt-1">No plans are currently awaiting your signature.</p>
               </div>
             ) : (
-              pendingSheets.map(sheet => (
-                <Link key={sheet.id} href={`/manager/review/${sheet.id}`}>
-                  <div className="flex items-center justify-between p-5 bg-zinc-900 hover:bg-zinc-800/80 border border-zinc-800 hover:border-zinc-700 transition-colors rounded-xl group cursor-pointer">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-zinc-100 font-medium">{sheet.user.name}</h3>
-                        <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded uppercase tracking-wider">{sheet.quarter}</span>
+              <div className="flex flex-col gap-3">
+                {pendingSheets.map(sheet => (
+                  <Link key={sheet.id} href={`/manager/review/${sheet.id}`}>
+                    <div className="flex items-center justify-between p-4 bg-zinc-900/40 hover:bg-zinc-900/60 border border-amber-500/10 hover:border-amber-500/20 transition-all rounded-xl group cursor-pointer active:scale-[0.99] shadow-sm">
+                      <div>
+                        <div className="flex items-center gap-2.5">
+                          <h3 className="text-zinc-150 font-semibold text-sm group-hover:text-zinc-100 transition-colors">{sheet.user.name}</h3>
+                          <span className="px-2 py-0.5 text-[9px] font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-full uppercase tracking-wider">{sheet.quarter}</span>
+                        </div>
+                        <p className="text-xs text-zinc-500 mt-1">{sheet.goals.length} performance objectives defined</p>
                       </div>
-                      <p className="text-sm text-zinc-400 mt-0.5">{sheet.goals.length} goals submitted</p>
+                      <div className="flex items-center gap-4">
+                        <span className="px-2 py-0.5 text-[9px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full uppercase tracking-wider">
+                          Awaiting Approval
+                        </span>
+                        <ChevronRight className="text-zinc-650 group-hover:text-zinc-400 transition-colors" size={16} />
+                      </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <span className="px-2.5 py-1 text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full">
-                        {sheet.status === "UNDER_REVIEW" ? "Under Review" : "Needs Review"}
-                      </span>
-                      <ChevronRight className="text-zinc-500 group-hover:text-zinc-300 transition-colors" size={20} />
-                    </div>
-                  </div>
-                </Link>
-              ))
+                  </Link>
+                ))}
+              </div>
             )}
           </div>
 
+          {/* Finalized & Active Section */}
           <div className="space-y-4">
-            <h2 className="text-lg font-medium text-zinc-100 mb-4">Approved & Locked</h2>
+            <h2 className="text-xs font-bold text-zinc-450 uppercase tracking-wider mb-3">Finalized & Active Plans</h2>
             {lockedSheets.length === 0 ? (
-              <p className="text-zinc-500 text-sm">No approved sheets yet.</p>
+              <p className="text-zinc-650 text-xs italic">No finalized plans exist yet for this cycle.</p>
             ) : (
-              lockedSheets.map(sheet => (
-                <Link key={sheet.id} href={`/manager/review/${sheet.id}`}>
-                  <div className="flex items-center justify-between p-4 bg-zinc-950 hover:bg-zinc-900/80 border border-zinc-800/50 hover:border-zinc-700 rounded-xl transition-colors group cursor-pointer">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-zinc-300 font-medium">{sheet.user.name}</h3>
-                        <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded uppercase tracking-wider">{sheet.quarter}</span>
+              <div className="flex flex-col gap-3">
+                {lockedSheets.map(sheet => (
+                  <Link key={sheet.id} href={`/manager/review/${sheet.id}`}>
+                    <div className="flex items-center justify-between p-4 bg-zinc-950/40 hover:bg-zinc-900/40 border border-zinc-900 hover:border-zinc-850 rounded-xl transition-all group cursor-pointer active:scale-[0.99] shadow-sm">
+                      <div>
+                        <div className="flex items-center gap-2.5">
+                          <h3 className="text-zinc-350 font-semibold text-sm group-hover:text-zinc-200 transition-colors">{sheet.user.name}</h3>
+                          <span className="px-2 py-0.5 text-[9px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full uppercase tracking-wider">{sheet.quarter}</span>
+                        </div>
+                        <p className="text-xs text-zinc-550 mt-1">{sheet.goals.length} operational goals active</p>
                       </div>
-                      <p className="text-xs text-zinc-500 mt-0.5">{sheet.goals.length} goals approved</p>
+                      <div className="flex items-center gap-4">
+                        <span className="px-2 py-0.5 text-[9px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full uppercase tracking-wider">
+                          {sheet.status === "LOCKED" ? "Finalized" : "Approved"}
+                        </span>
+                        <ChevronRight className="text-zinc-700 group-hover:text-zinc-550 transition-colors" size={16} />
+                      </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <span className="px-2.5 py-1 text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full">
-                        {sheet.status === "LOCKED" ? "Locked" : "Approved"}
-                      </span>
-                      <ChevronRight className="text-zinc-600 group-hover:text-zinc-300 transition-colors" size={20} />
-                    </div>
-                  </div>
-                </Link>
-              ))
+                  </Link>
+                ))}
+              </div>
             )}
           </div>
 
+          {/* Still Drafting/Planning Section */}
           {draftSheets.length > 0 && (
             <div className="space-y-4">
-              <h2 className="text-lg font-medium text-zinc-100 mb-4">Still Drafting</h2>
-              {draftSheets.map(sheet => (
-                <div key={sheet.id} className="flex items-center justify-between p-4 bg-zinc-950 border border-zinc-800/50 rounded-xl">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-zinc-300 font-medium">{sheet.user.name}</h3>
-                      <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-zinc-800 border border-zinc-700 text-zinc-400 rounded uppercase tracking-wider">{sheet.quarter}</span>
+              <h2 className="text-xs font-bold text-zinc-450 uppercase tracking-wider mb-3">In Planning Workspace</h2>
+              <div className="flex flex-col gap-3">
+                {draftSheets.map(sheet => (
+                  <div key={sheet.id} className="flex items-center justify-between p-4 bg-zinc-950/20 border border-zinc-900/60 rounded-xl">
+                    <div>
+                      <div className="flex items-center gap-2.5">
+                        <h3 className="text-zinc-350 font-medium text-sm">{sheet.user.name}</h3>
+                        <span className="px-2 py-0.5 text-[9px] font-bold bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full uppercase tracking-wider">{sheet.quarter}</span>
+                      </div>
+                      <p className="text-xs text-zinc-550 mt-1">{sheet.goals.length} goals in draft</p>
                     </div>
-                    <p className="text-xs text-zinc-500 mt-0.5">{sheet.goals.length} goals drafted so far</p>
+                    <span className="px-2 py-0.5 text-[9px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full uppercase tracking-wider">
+                      Drafting
+                    </span>
                   </div>
-                  <span className="px-2.5 py-1 text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">
-                    In Draft
-                  </span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </div>
 
-        <div className="lg:col-span-1">
-          <h2 className="text-lg font-medium text-zinc-100 mb-4 flex items-center gap-2">
-            <Activity size={18} className="text-zinc-400" /> Team Activity
-          </h2>
-          <div className="bg-zinc-950 p-5 rounded-xl border border-zinc-800">
-            <RecentActivityFeed limit={10} userId={session.user.id} />
+        {/* Right side aligned feed activity */}
+        <div className="lg:col-span-1 space-y-6">
+          <div>
+            <h2 className="text-xs font-bold text-zinc-450 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <Activity size={14} className="text-zinc-500" /> Team Activity
+            </h2>
+            <div className="bg-zinc-950/50 p-4 rounded-xl border border-zinc-900">
+              <RecentActivityFeed limit={10} userId={session.user.id} />
+            </div>
           </div>
         </div>
       </div>

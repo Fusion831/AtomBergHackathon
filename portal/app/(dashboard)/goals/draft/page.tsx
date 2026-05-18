@@ -10,29 +10,37 @@ interface PageProps {
   searchParams: Promise<{ tab?: string }>;
 }
 
-const STATUS_CONFIG: Record<string, { label: string; description: string; color: string; icon: React.ElementType }> = {
+const STATUS_CONFIG: Record<string, { label: string; description: string; bgClass: string; textClass: string; borderClass: string; icon: React.ElementType }> = {
   SUBMITTED: {
-    label: "Submitted for Approval",
-    description: "Your goal sheet has been submitted and is awaiting your manager's review. You will be notified when it is approved or returned for rework.",
-    color: "blue",
-    icon: Send,
+    label: "Awaiting Manager Approval",
+    description: "Your Quarter Plan has been submitted and is currently awaiting review by your manager.",
+    bgClass: "bg-amber-500/5",
+    textClass: "text-amber-400",
+    borderClass: "border-amber-500/20",
+    icon: Clock,
   },
   UNDER_REVIEW: {
-    label: "Under Review",
-    description: "Your manager is currently reviewing your goal sheet. You will be notified when it is approved or returned for rework.",
-    color: "amber",
+    label: "Awaiting Manager Approval",
+    description: "Your Quarter Plan is under review. Your manager will sign off shortly or return it for calibration.",
+    bgClass: "bg-amber-500/5",
+    textClass: "text-amber-400",
+    borderClass: "border-amber-500/20",
     icon: Clock,
   },
   APPROVED: {
-    label: "Approved",
-    description: "Your goal sheet has been approved by your manager. Your goals are now active for the current cycle.",
-    color: "emerald",
+    label: "Approved & Active",
+    description: "Your Quarter Plan is active. You can now log performance updates for this cycle.",
+    bgClass: "bg-emerald-500/5",
+    textClass: "text-emerald-400",
+    borderClass: "border-emerald-500/20",
     icon: CheckCircle,
   },
   LOCKED: {
-    label: "Locked",
-    description: "Your goal sheet is locked. Goals cannot be modified unless an Admin unlocks the sheet upon request.",
-    color: "purple",
+    label: "Finalized & Locked",
+    description: "This Quarter Plan is finalized. Updates can only be logged during check-in windows, and plan alterations require administrative unlock permission.",
+    bgClass: "bg-zinc-500/5",
+    textClass: "text-zinc-400",
+    borderClass: "border-zinc-800",
     icon: Lock,
   },
 };
@@ -42,11 +50,11 @@ export default async function DraftGoalsPage(props: PageProps) {
   if (!session?.user) redirect("/login");
 
   const searchParams = await props.searchParams;
-  const selectedTab = searchParams.tab || "active"; // Default to active execution workspace
+  const selectedTab = searchParams.tab || "active"; // Default to active performance
 
   const activeCycle = await prisma.goalCycle.findFirst({ where: { isActive: true } });
 
-  // Map tabs to exact target quarters
+  // Map tabs to target quarters
   let targetQuarter = "Q2";
   if (selectedTab === "planning") {
     targetQuarter = activeCycle?.planningQuarter || "Q3";
@@ -56,7 +64,7 @@ export default async function DraftGoalsPage(props: PageProps) {
     targetQuarter = activeCycle?.activeQuarter || "Q2";
   }
 
-  // Find the sheet for this target quarter
+  // Find the plan for this target quarter
   let sheet = await prisma.goalSheet.findFirst({
     where: {
       userId: session.user.id,
@@ -66,7 +74,7 @@ export default async function DraftGoalsPage(props: PageProps) {
     include: { goals: { include: { checkIns: true } } }
   });
 
-  // Auto-instantiate a DRAFT sheet IF the planning workspace is selected and planning window is open
+  // Auto-instantiate a DRAFT plan IF the planning workspace is selected and planning window is open
   if (!sheet && selectedTab === "planning" && activeCycle && activeCycle.planningQuarter === targetQuarter) {
     sheet = await prisma.goalSheet.create({
       data: {
@@ -80,18 +88,18 @@ export default async function DraftGoalsPage(props: PageProps) {
   }
 
   // Dynamic Workspace Headers
-  let workspaceTitle = "Active Performance Workspace";
-  let workspaceSubtext = "Track progress of your key operational metrics, log check-in achievements, and review real-time feedback.";
-  let accentColor = "emerald";
+  let workspaceTitle = "Q2 Active Performance";
+  let workspaceSubtext = "Track current quarter execution, log performance updates against operational key results, and view real-time comments.";
+  let borderActiveTab = "border-emerald-500 text-emerald-400";
 
   if (selectedTab === "planning") {
-    workspaceTitle = "Goal Planning Workspace";
-    workspaceSubtext = "Set ambitious objectives, balance weightage distributions, and draft goals for the upcoming performance cycle.";
-    accentColor = "blue";
+    workspaceTitle = "Q3 Goal Planning";
+    workspaceSubtext = "Draft your success targets, configure contributions, and prepare your plan for the upcoming quarter.";
+    borderActiveTab = "border-blue-500 text-blue-400";
   } else if (selectedTab === "historical") {
-    workspaceTitle = "Historical Records Archive";
-    workspaceSubtext = "Explore archived goals, achievement milestones, check-in reflections, and manager sign-off commentary.";
-    accentColor = "zinc";
+    workspaceTitle = "Q1 Performance History";
+    workspaceSubtext = "View finalized historical plans, end-of-quarter performance scores, and past check-in details.";
+    borderActiveTab = "border-zinc-500 text-zinc-300";
   }
 
   const isDraft = sheet?.status === "DRAFT";
@@ -100,43 +108,43 @@ export default async function DraftGoalsPage(props: PageProps) {
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
-      {/* Segmented workspace title and phase description */}
-      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Header section with humanized enterprise text */}
+      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 select-none">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-100 tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-zinc-150 tracking-tight flex items-center gap-2">
             {workspaceTitle}
           </h1>
-          <p className="text-sm text-zinc-400 mt-1 max-w-xl">
+          <p className="text-sm text-zinc-500 mt-1 max-w-xl">
             {workspaceSubtext}
           </p>
         </div>
         <div className="flex items-center gap-2">
           {activeCycle && (
-            <span className="text-[10px] font-semibold bg-zinc-900 border border-zinc-800 text-zinc-400 px-3 py-1 rounded-md uppercase tracking-wider">
+            <span className="text-[10px] font-bold bg-zinc-900 border border-zinc-800 text-zinc-400 px-3 py-1 rounded-lg uppercase tracking-wider">
               Cycle: {activeCycle.name}
             </span>
           )}
         </div>
       </div>
 
-      {/* Segmented corporate tab bar */}
-      <div className="flex border-b border-zinc-800/80 mb-8 overflow-x-auto gap-2">
+      {/* Segmented executive tab bar */}
+      <div className="flex border-b border-zinc-900 mb-8 overflow-x-auto gap-2 select-none">
         <Link
           href="/goals/draft?tab=active"
           className={`flex items-center gap-2 pb-3 px-4 text-xs sm:text-sm font-semibold tracking-wide border-b-2 transition-all shrink-0 ${
             selectedTab === "active"
               ? "border-emerald-500 text-emerald-400"
-              : "border-transparent text-zinc-400 hover:text-zinc-200"
+              : "border-transparent text-zinc-500 hover:text-zinc-350"
           }`}
         >
-          <Target size={16} className={selectedTab === "active" ? "text-emerald-400" : "text-zinc-500"} />
-          <span>Active Execution ({activeCycle?.activeQuarter || "Q2"})</span>
-          <span className={`px-1.5 py-0.5 text-[9px] rounded font-bold uppercase ${
+          <Target size={16} className={selectedTab === "active" ? "text-emerald-400" : "text-zinc-600"} />
+          <span>Q2 Active Performance</span>
+          <span className={`px-1.5 py-0.5 text-[9px] rounded font-bold uppercase border ${
             selectedTab === "active"
-              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-              : "bg-zinc-900 text-zinc-500 border border-zinc-800/60"
+              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+              : "bg-zinc-950 text-zinc-600 border-zinc-900"
           }`}>
-            Active
+            Execution
           </span>
         </Link>
 
@@ -145,17 +153,17 @@ export default async function DraftGoalsPage(props: PageProps) {
           className={`flex items-center gap-2 pb-3 px-4 text-xs sm:text-sm font-semibold tracking-wide border-b-2 transition-all shrink-0 ${
             selectedTab === "planning"
               ? "border-blue-500 text-blue-400"
-              : "border-transparent text-zinc-400 hover:text-zinc-200"
+              : "border-transparent text-zinc-500 hover:text-zinc-350"
           }`}
         >
-          <Calendar size={16} className={selectedTab === "planning" ? "text-blue-400" : "text-zinc-500"} />
-          <span>Future Planning ({activeCycle?.planningQuarter || "Q3"})</span>
-          <span className={`px-1.5 py-0.5 text-[9px] rounded font-bold uppercase ${
+          <Calendar size={16} className={selectedTab === "planning" ? "text-blue-400" : "text-zinc-600"} />
+          <span>Q3 Goal Planning</span>
+          <span className={`px-1.5 py-0.5 text-[9px] rounded font-bold uppercase border ${
             selectedTab === "planning"
-              ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-              : "bg-zinc-900 text-zinc-500 border border-zinc-800/60"
+              ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
+              : "bg-zinc-950 text-zinc-600 border-zinc-900"
           }`}>
-            Draft
+            Planning
           </span>
         </Link>
 
@@ -164,40 +172,35 @@ export default async function DraftGoalsPage(props: PageProps) {
           className={`flex items-center gap-2 pb-3 px-4 text-xs sm:text-sm font-semibold tracking-wide border-b-2 transition-all shrink-0 ${
             selectedTab === "historical"
               ? "border-zinc-500 text-zinc-300"
-              : "border-transparent text-zinc-400 hover:text-zinc-200"
+              : "border-transparent text-zinc-500 hover:text-zinc-350"
           }`}
         >
-          <Archive size={16} className={selectedTab === "historical" ? "text-zinc-300" : "text-zinc-500"} />
-          <span>Historical Archive (Q1)</span>
-          <span className={`px-1.5 py-0.5 text-[9px] rounded font-bold uppercase ${
+          <Archive size={16} className={selectedTab === "historical" ? "text-zinc-300" : "text-zinc-600"} />
+          <span>Q1 Performance History</span>
+          <span className={`px-1.5 py-0.5 text-[9px] rounded font-bold uppercase border ${
             selectedTab === "historical"
-              ? "bg-zinc-500/10 text-zinc-300 border border-zinc-550/20"
-              : "bg-zinc-900 text-zinc-500 border border-zinc-800/60"
+              ? "bg-zinc-500/10 text-zinc-350 border-zinc-800"
+              : "bg-zinc-950 text-zinc-600 border-zinc-900"
           }`}>
-            Archived
+            History
           </span>
         </Link>
       </div>
 
-      {/* Info Banners for non-draft sheets in planning/active states */}
+      {/* Info Banners for non-draft sheets in planning/execution states */}
       {sheet && statusInfo && selectedTab !== "historical" && (
-        <div className={`mb-6 p-4 rounded-xl border bg-${statusInfo.color}-500/5 border-${statusInfo.color}-500/20`}
-          style={{
-            backgroundColor: `color-mix(in srgb, var(--color-${statusInfo.color}) 5%, transparent)`,
-            borderColor: `color-mix(in srgb, var(--color-${statusInfo.color}) 20%, transparent)`,
-          }}
-        >
+        <div className={`mb-6 p-4 rounded-xl border ${statusInfo.bgClass} ${statusInfo.borderClass} animate-fade-in`}>
           <div className="flex items-start gap-3">
-            <StatusIcon size={20} className={`text-${statusInfo.color}-400 shrink-0 mt-0.5`} />
+            <StatusIcon size={18} className={`${statusInfo.textClass} shrink-0 mt-0.5`} />
             <div>
-              <h3 className={`text-sm font-semibold text-${statusInfo.color}-400`}>{statusInfo.label}</h3>
-              <p className="text-sm text-zinc-400 mt-1">{statusInfo.description}</p>
+              <h3 className={`text-xs font-semibold ${statusInfo.textClass}`}>{statusInfo.label}</h3>
+              <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{statusInfo.description}</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Workspace Area */}
+      {/* Workspace Content Frame */}
       {sheet ? (
         <GoalSheetManager 
           sheet={sheet as any} 
@@ -206,33 +209,33 @@ export default async function DraftGoalsPage(props: PageProps) {
         />
       ) : (
         /* Empty / Locked Skeleton States */
-        <div className="flex flex-col items-center justify-center py-16 px-6 text-center border border-zinc-850 rounded-2xl bg-zinc-950/40 backdrop-blur shadow-sm">
+        <div className="flex flex-col items-center justify-center py-20 px-6 text-center border border-zinc-900 rounded-2xl bg-zinc-950/20 shadow-sm select-none">
           {selectedTab === "planning" ? (
             <>
-              <div className="w-14 h-14 bg-zinc-900 border border-zinc-850 rounded-full flex items-center justify-center mb-5 text-zinc-500">
-                <Calendar size={28} />
+              <div className="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center mb-4 text-zinc-650">
+                <Calendar size={22} />
               </div>
-              <h3 className="text-lg font-semibold text-zinc-200">Goal Planning is Closed</h3>
-              <p className="text-sm text-zinc-400 mt-2 max-w-md leading-relaxed">
-                The organizational window for drafting {activeCycle?.planningQuarter || "Q3"} performance goals has not been opened yet by administration. Banners will notify you when drafting is enabled.
+              <h3 className="text-sm font-bold text-zinc-300">Goal Planning Window is Closed</h3>
+              <p className="text-xs text-zinc-500 mt-2 max-w-sm leading-relaxed">
+                The planning window for {activeCycle?.planningQuarter || "Q3"} goals has not been opened yet by the operations administrator. You will receive an alert once planning is enabled.
               </p>
-              <div className="mt-6 px-4 py-2 text-xs font-semibold text-amber-400 bg-amber-400/5 border border-amber-400/10 rounded-md">
+              <div className="mt-5 px-3 py-1.5 text-[10px] font-bold text-emerald-400 bg-emerald-500/5 border border-emerald-500/10 rounded-lg">
                 Active Execution for {activeCycle?.activeQuarter || "Q2"} remains open.
               </div>
             </>
           ) : selectedTab === "active" ? (
             <>
-              <div className="w-14 h-14 bg-zinc-900 border border-zinc-850 rounded-full flex items-center justify-center mb-5 text-zinc-500">
-                <Target size={28} />
+              <div className="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center mb-4 text-zinc-650">
+                <Target size={22} />
               </div>
-              <h3 className="text-lg font-semibold text-zinc-200">No Active Operational Goals</h3>
-              <p className="text-sm text-zinc-400 mt-2 max-w-md leading-relaxed">
-                You do not have an active, approved goal sheet for this operational cycle ({activeCycle?.activeQuarter || "Q2"}).
+              <h3 className="text-sm font-bold text-zinc-300">No Active Quarter Plan Found</h3>
+              <p className="text-xs text-zinc-500 mt-2 max-w-sm leading-relaxed">
+                You do not have an approved performance plan active for this quarter ({activeCycle?.activeQuarter || "Q2"}).
               </p>
               {activeCycle?.planningQuarter && (
                 <Link
                   href="/goals/draft?tab=planning"
-                  className="mt-6 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-md transition-colors shadow-md"
+                  className="mt-5 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg transition-colors active:scale-[0.98]"
                 >
                   Propose Q3 Goals
                 </Link>
@@ -240,12 +243,12 @@ export default async function DraftGoalsPage(props: PageProps) {
             </>
           ) : (
             <>
-              <div className="w-14 h-14 bg-zinc-900 border border-zinc-850 rounded-full flex items-center justify-center mb-5 text-zinc-500">
-                <Archive size={28} />
+              <div className="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center mb-4 text-zinc-650">
+                <Archive size={22} />
               </div>
-              <h3 className="text-lg font-semibold text-zinc-200">No Historical Records</h3>
-              <p className="text-sm text-zinc-400 mt-2 max-w-md leading-relaxed">
-                There are no archived goal sheets or complete check-in records available for previous operational quarters.
+              <h3 className="text-sm font-bold text-zinc-300">No Historical Records Available</h3>
+              <p className="text-xs text-zinc-500 mt-2 max-w-sm leading-relaxed">
+                No past finalized records exist under your account for previous cycle quarters.
               </p>
             </>
           )}

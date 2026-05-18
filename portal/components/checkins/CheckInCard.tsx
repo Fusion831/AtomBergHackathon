@@ -3,7 +3,7 @@
 import { Goal, CheckIn, CheckInPeriod, GoalStatus } from "@prisma/client";
 import { useState, useTransition } from "react";
 import { upsertCheckIn } from "@/app/actions/checkInActions";
-import { Save, MessageSquare } from "lucide-react";
+import { Save, MessageSquare, Info } from "lucide-react";
 
 type GoalWithCheckIns = Goal & { checkIns: CheckIn[] };
 
@@ -33,85 +33,87 @@ export function CheckInCard({ goal, activePeriod, readOnly }: { goal: GoalWithCh
                      statusOverride !== (currentCheckIn?.status || undefined);
 
   return (
-    <div className="p-5 bg-zinc-900 border border-zinc-800 rounded-xl space-y-4">
-      <div className="flex justify-between items-start gap-4 border-b border-zinc-800/50 pb-4">
+    <div className="p-5 bg-zinc-900/60 border border-zinc-900 rounded-xl space-y-4 shadow-md select-none">
+      <div className="flex justify-between items-start gap-4 border-b border-zinc-950 pb-4">
         <div>
-          <h4 className="text-zinc-100 font-medium">{goal.title}</h4>
-          <div className="flex gap-4 mt-2 text-sm">
-            <div className="text-zinc-400">
-              <span className="block text-xs uppercase tracking-wider text-zinc-500 mb-0.5">Target</span>
-              <span className="font-medium text-zinc-200">
+          <h4 className="text-zinc-150 font-semibold text-sm">{goal.title}</h4>
+          <div className="flex gap-4 mt-2 text-xs">
+            <div>
+              <span className="block text-[9px] uppercase tracking-wider text-zinc-550 mb-0.5 font-bold">Target Target</span>
+              <span className="font-semibold text-zinc-350">
                 {goal.targetValue ?? "N/A"} {goal.uomType === "PERCENTAGE" ? "%" : ""}
               </span>
             </div>
-            <div className="w-px bg-zinc-800"></div>
-            <div className="text-zinc-400">
-              <span className="block text-xs uppercase tracking-wider text-zinc-500 mb-0.5">Current Progress</span>
-              <span className={`font-medium ${currentCheckIn?.progressScore && currentCheckIn.progressScore >= 100 ? "text-emerald-400" : currentCheckIn?.progressScore && currentCheckIn.progressScore >= 50 ? "text-amber-400" : "text-zinc-200"}`}>
+            <div className="w-px bg-zinc-900"></div>
+            <div>
+              <span className="block text-[9px] uppercase tracking-wider text-zinc-550 mb-0.5 font-bold">Progress Rate</span>
+              <span className={`font-mono font-bold ${currentCheckIn?.progressScore && currentCheckIn.progressScore >= 100 ? "text-emerald-450" : currentCheckIn?.progressScore && currentCheckIn.progressScore >= 50 ? "text-amber-450" : "text-zinc-350"}`}>
                 {currentCheckIn?.progressScore ?? 0}%
               </span>
             </div>
           </div>
         </div>
         <div className="text-right">
-          <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${
-            currentCheckIn?.status === "COMPLETED" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
-            currentCheckIn?.status === "ON_TRACK" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" :
-            "bg-zinc-800 text-zinc-400 border border-zinc-700"
+          <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full border ${
+            currentCheckIn?.status === "COMPLETED" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
+            currentCheckIn?.status === "ON_TRACK" ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
+            "bg-zinc-800 text-zinc-400 border-zinc-700"
           }`}>
             {currentCheckIn?.status?.replace("_", " ") || "NOT STARTED"}
           </span>
         </div>
       </div>
 
-      <div className="space-y-4 pt-2">
+      <div className="space-y-4 pt-1">
         {readOnly ? (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-800/80">
-                <span className="block text-[10px] font-semibold uppercase tracking-wider text-zinc-500 mb-1">Actual Achievement</span>
-                <p className="text-sm font-medium text-zinc-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              <div className="bg-zinc-950/40 p-3 rounded-lg border border-zinc-900">
+                <span className="block text-[9px] font-bold uppercase tracking-wider text-zinc-550 mb-1">Actual Value</span>
+                <p className="text-xs font-semibold text-zinc-300">
                   {currentCheckIn?.actualValue !== undefined && currentCheckIn?.actualValue !== null 
                     ? `${currentCheckIn.actualValue}${goal.uomType === "PERCENTAGE" ? "%" : ""}`
-                    : "No actual logged yet"
+                    : "No logged values"
                   }
                 </p>
               </div>
-              <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-800/80">
-                <span className="block text-[10px] font-semibold uppercase tracking-wider text-zinc-500 mb-1">Status Mode</span>
-                <p className="text-sm font-medium text-zinc-200">
-                  {currentCheckIn ? (currentCheckIn.status ? "Manual Override" : "Auto-calculated") : "Not Started"}
+              <div className="bg-zinc-950/40 p-3 rounded-lg border border-zinc-900">
+                <span className="block text-[9px] font-bold uppercase tracking-wider text-zinc-550 mb-1">Status Mode</span>
+                <p className="text-xs font-semibold text-zinc-300">
+                  {currentCheckIn ? (currentCheckIn.status ? "Override" : "Automated") : "Pending"}
                 </p>
               </div>
             </div>
 
             <div className="space-y-1">
-              <span className="block text-[10px] font-semibold uppercase tracking-wider text-zinc-500 mb-1">Your Comments</span>
+              <span className="block text-[9px] font-bold uppercase tracking-wider text-zinc-550 mb-1">Employee Reflection</span>
               {currentCheckIn?.employeeComment ? (
-                <p className="text-sm text-zinc-300 p-3 bg-zinc-950 rounded-md border border-zinc-800/60 leading-relaxed">
+                <p className="text-xs text-zinc-400 p-3 bg-zinc-950/40 rounded-lg border border-zinc-900 leading-relaxed">
                   {currentCheckIn.employeeComment}
                 </p>
               ) : (
-                <p className="text-xs text-zinc-500 italic p-3 bg-zinc-950 rounded-md border border-zinc-850">No employee comments logged.</p>
+                <p className="text-xs text-zinc-650 italic p-3 bg-zinc-950/20 rounded-lg border border-zinc-900">No reflections logged for this cycle.</p>
               )}
             </div>
           </>
         ) : (
           <>
             <div className="space-y-2">
-              <label className="text-xs text-zinc-400 font-medium uppercase tracking-wider">Update Actual Achievement</label>
+              <label className="text-[10px] text-zinc-450 font-bold uppercase tracking-wider flex items-center gap-1">
+                <Info size={12} className="text-zinc-600" /> Update Current Actual
+              </label>
               <div className="flex gap-2">
                 <input 
                   type="number"
-                  placeholder={`Enter actual ${goal.uomType.toLowerCase()}`}
+                  placeholder={`Enter actual ${goal.uomType.toLowerCase()} value`}
                   value={actualValue}
                   onChange={(e) => setActualValue(e.target.value)}
-                  className="flex-1 bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-blue-500"
+                  className="flex-1 bg-zinc-950 border border-zinc-900 rounded-lg px-3 py-2 text-xs text-zinc-200 placeholder:text-zinc-650 focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
                 />
                 <select
                   value={statusOverride || ""}
                   onChange={(e) => setStatusOverride(e.target.value ? (e.target.value as GoalStatus) : undefined)}
-                  className="w-40 bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-blue-500"
+                  className="w-40 bg-zinc-950 border border-zinc-900 rounded-lg px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
                 >
                   <option value="">Auto-calculate</option>
                   <option value="NOT_STARTED">Not Started</option>
@@ -122,23 +124,23 @@ export function CheckInCard({ goal, activePeriod, readOnly }: { goal: GoalWithCh
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs text-zinc-400 font-medium uppercase tracking-wider">Your Comments</label>
+              <label className="text-[10px] text-zinc-450 font-bold uppercase tracking-wider">Commentary & Insights</label>
               <textarea 
-                placeholder="Describe what you achieved, blockers, or help needed..."
+                placeholder="Share specific outcomes achieved, blockers, or support required..."
                 value={employeeComment}
                 onChange={(e) => setEmployeeComment(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm text-zinc-100 min-h-[80px] resize-y focus:outline-none focus:border-blue-500"
+                className="w-full bg-zinc-950 border border-zinc-900 rounded-lg px-3 py-2 text-xs text-zinc-250 min-h-[60px] resize-y focus:outline-none focus:ring-1 focus:ring-blue-500 leading-relaxed"
               />
             </div>
           </>
         )}
 
         {currentCheckIn?.managerComment && (
-          <div className="flex items-start gap-2.5 text-sm text-blue-400 bg-blue-500/10 px-3 py-3 rounded-md border border-blue-500/20">
-            <MessageSquare size={16} className="mt-0.5 shrink-0" />
+          <div className="flex items-start gap-2.5 text-xs text-blue-400 bg-blue-500/5 px-3 py-3 rounded-lg border border-blue-500/15 leading-relaxed">
+            <MessageSquare size={14} className="mt-0.5 shrink-0" />
             <div>
-              <span className="block text-xs font-semibold uppercase tracking-wider mb-1 opacity-90">Manager Feedback</span>
-              <p className="text-zinc-300 text-sm leading-relaxed">{currentCheckIn.managerComment}</p>
+              <span className="block text-[9px] font-bold uppercase tracking-wider mb-1 opacity-90 text-blue-300">Manager Sign-off Feedback</span>
+              <p className="text-zinc-350 text-xs leading-relaxed">{currentCheckIn.managerComment}</p>
             </div>
           </div>
         )}
@@ -148,9 +150,10 @@ export function CheckInCard({ goal, activePeriod, readOnly }: { goal: GoalWithCh
             <button 
               onClick={handleSave}
               disabled={!hasChanges || isPending}
-              className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white rounded-md transition-colors flex items-center gap-2 font-medium"
+              className="px-4 py-2 text-xs bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-900 disabled:text-zinc-600 border border-transparent disabled:border-zinc-950 text-white rounded-lg transition-all font-bold flex items-center gap-1.5 active:scale-[0.98] shadow-lg shadow-blue-900/10"
+              type="button"
             >
-              <Save size={16} /> {isPending ? "Saving..." : "Save Check-in"}
+              <Save size={14} /> {isPending ? "Saving..." : "Save Update"}
             </button>
           </div>
         )}
