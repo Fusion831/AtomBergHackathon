@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ReportsFilters } from "@/components/reports/ReportsFilters";
+import { InteractiveReportsTabs } from "@/components/reports/InteractiveReportsTabs";
 import { 
   AnalyticsDashboard, 
   AdminAnalyticsData, 
@@ -98,51 +99,29 @@ export default async function ReportsPage({
         </div>
       </div>
 
-      {/* Tabs Navigation (only shown for managers/admins) */}
-      {isAdminOrManager && (
-        <div className="flex border-b border-zinc-800 gap-6">
-          <Link 
-            href="/reports?tab=insights" 
-            className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
-              activeTab === "insights" 
-                ? "border-blue-500 text-zinc-100" 
-                : "border-transparent text-zinc-500 hover:text-zinc-300"
-            }`}
-          >
-            <TrendingUp size={16} /> Operational Insights
-          </Link>
-          <Link 
-            href="/reports?tab=exports" 
-            className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
-              activeTab === "exports" 
-                ? "border-blue-500 text-zinc-100" 
-                : "border-transparent text-zinc-500 hover:text-zinc-300"
-            }`}
-          >
-            <FileSpreadsheet size={16} /> Custom Data Export
-          </Link>
-        </div>
-      )}
-
-      {/* Tab Panels */}
-      {activeTab === "insights" ? (
-        <AnalyticsDashboard role={session.user.role as "ADMIN" | "MANAGER" | "EMPLOYEE"} data={analyticsData} />
-      ) : (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl animate-in fade-in-50 duration-300">
-          <div className="p-5 border-b border-zinc-800/80">
-            <h2 className="text-lg font-medium text-zinc-100">Achievement Report</h2>
-            <p className="text-sm text-zinc-400 mt-1">Export employee goal progression, actuals, and scores based on specific timelines and metrics.</p>
+      <InteractiveReportsTabs 
+        initialTab={activeTab}
+        isAdminOrManager={isAdminOrManager}
+        insightsContent={
+          <AnalyticsDashboard role={session.user.role as "ADMIN" | "MANAGER" | "EMPLOYEE"} data={analyticsData} />
+        }
+        exportsContent={
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl animate-in fade-in-50 duration-300">
+            <div className="p-5 border-b border-zinc-800/80">
+              <h2 className="text-lg font-medium text-zinc-100">Achievement Report</h2>
+              <p className="text-sm text-zinc-400 mt-1">Export employee goal progression, actuals, and scores based on specific timelines and metrics.</p>
+            </div>
+            <div className="p-6 bg-zinc-900/50">
+              <ReportsFilters 
+                isAdmin={session.user.role === "ADMIN"} 
+                cycles={cycles} 
+                departments={departments} 
+                managers={managers} 
+              />
+            </div>
           </div>
-          <div className="p-6 bg-zinc-900/50">
-            <ReportsFilters 
-              isAdmin={session.user.role === "ADMIN"} 
-              cycles={cycles} 
-              departments={departments} 
-              managers={managers} 
-            />
-          </div>
-        </div>
-      )}
+        }
+      />
     </div>
   );
 }

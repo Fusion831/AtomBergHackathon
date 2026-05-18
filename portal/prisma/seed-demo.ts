@@ -305,7 +305,7 @@ async function main() {
 
     for (let i = 0; i < goalsDef.Q2.length; i++) {
       const gDef = goalsDef.Q2[i];
-      const weight = i === 0 ? 50 : 50;
+      const weight = user.id === platformEngManager.id ? 25 : (i === 0 ? 50 : 50);
 
       // Check if we can cascade master stability goal to Platform Engineering direct reports
       const isSharedCascade = part.deptName === "Platform Engineering" && !part.isManager && i === 0;

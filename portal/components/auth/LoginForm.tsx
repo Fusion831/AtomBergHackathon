@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -9,6 +9,7 @@ export function LoginForm() {
   const [password, setPassword] = useState("password");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,17 +28,29 @@ export function LoginForm() {
         setError("Invalid credentials. Please try again.");
         setIsLoading(false);
       } else {
-        router.push("/goals/draft");
+        // Trigger high-fidelity optimistic transition skeleton instantly
+        setIsTransitioning(true);
+        
+        // Fetch session to determine target redirection role
+        const session = await getSession();
+        if (session?.user?.role === "ADMIN") {
+          router.push("/admin/governance");
+        } else {
+          router.push("/goals/draft");
+        }
+        
         router.refresh();
       }
     } catch (err) {
       setError("An unexpected error occurred.");
       setIsLoading(false);
+      setIsTransitioning(false);
     }
   };
 
   return (
-    <form className="space-y-5" onSubmit={handleSubmit}>
+    <>
+      <form className="space-y-5" onSubmit={handleSubmit}>
       {error && (
         <div className="p-3 text-sm text-rose-500 bg-rose-500/10 border border-rose-500/20 rounded-lg flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0"></span>
@@ -89,5 +102,120 @@ export function LoginForm() {
         ) : "Sign In"}
       </button>
     </form>
+    
+    {isTransitioning && (
+      <div className="fixed inset-0 z-50 bg-black flex animate-fade-in font-sans">
+        {/* Left Sidebar Skeleton */}
+        <div className="w-64 border-r border-zinc-800 bg-zinc-950 p-6 flex flex-col justify-between shrink-0 h-full">
+          <div className="space-y-8">
+            {/* Brand Pulsing Logo */}
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 animate-pulse flex items-center justify-center">
+                <div className="w-4 h-4 rounded-full bg-blue-500/20 animate-pulse"></div>
+              </div>
+              <div className="h-4 w-24 bg-zinc-800 rounded animate-pulse"></div>
+            </div>
+
+            {/* Sidebar Nav Items */}
+            <div className="space-y-6">
+              <div className="space-y-2.5">
+                <div className="h-3 w-16 bg-zinc-900 rounded animate-pulse mb-4"></div>
+                <div className="flex items-center gap-3 px-3 py-2 bg-zinc-900/40 rounded-lg">
+                  <div className="w-4 h-4 rounded bg-zinc-800 animate-pulse"></div>
+                  <div className="h-3.5 w-20 bg-zinc-800 rounded animate-pulse"></div>
+                </div>
+                <div className="flex items-center gap-3 px-3 py-2">
+                  <div className="w-4 h-4 rounded bg-zinc-900 animate-pulse"></div>
+                  <div className="h-3.5 w-24 bg-zinc-900 rounded animate-pulse"></div>
+                </div>
+                <div className="flex items-center gap-3 px-3 py-2">
+                  <div className="w-4 h-4 rounded bg-zinc-900 animate-pulse"></div>
+                  <div className="h-3.5 w-16 bg-zinc-900 rounded animate-pulse"></div>
+                </div>
+              </div>
+
+              <div className="space-y-2.5 pt-4 border-t border-zinc-900">
+                <div className="h-3 w-20 bg-zinc-900 rounded animate-pulse mb-4"></div>
+                <div className="flex items-center gap-3 px-3 py-2">
+                  <div className="w-4 h-4 rounded bg-zinc-900 animate-pulse"></div>
+                  <div className="h-3.5 w-28 bg-zinc-900 rounded animate-pulse"></div>
+                </div>
+                <div className="flex items-center gap-3 px-3 py-2">
+                  <div className="w-4 h-4 rounded bg-zinc-900 animate-pulse"></div>
+                  <div className="h-3.5 w-24 bg-zinc-900 rounded animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom User Badge Skeleton */}
+          <div className="p-3 bg-zinc-900/30 border border-zinc-900 rounded-xl flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-zinc-850 animate-pulse"></div>
+            <div className="space-y-1.5 flex-1">
+              <div className="h-3 w-20 bg-zinc-800 rounded animate-pulse"></div>
+              <div className="h-2.5 w-12 bg-zinc-850 rounded animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content Skeleton Area */}
+        <div className="flex-1 flex flex-col h-full bg-black">
+          {/* Top Header Skeleton */}
+          <div className="h-[60px] border-b border-zinc-800/80 bg-zinc-950/80 px-8 flex items-center justify-between">
+            <div className="h-4 w-36 bg-zinc-900 rounded animate-pulse"></div>
+            <div className="flex items-center gap-4">
+              <div className="h-3 w-24 bg-zinc-900 rounded animate-pulse"></div>
+              <div className="w-8 h-8 rounded-full bg-zinc-900 animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Content Pulse Frame */}
+          <div className="flex-1 p-8 space-y-8 max-w-5xl w-full mx-auto overflow-hidden">
+            {/* Title skeleton */}
+            <div className="space-y-2">
+              <div className="h-7 w-48 bg-zinc-900/80 rounded-lg animate-pulse"></div>
+              <div className="h-3.5 w-80 bg-zinc-900/40 rounded animate-pulse"></div>
+            </div>
+
+            {/* 3 Metrics Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="p-6 bg-zinc-900/20 border border-zinc-850 rounded-2xl space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div className="h-3.5 w-20 bg-zinc-900 rounded animate-pulse"></div>
+                    <div className="w-5 h-5 bg-zinc-900 rounded-full animate-pulse"></div>
+                  </div>
+                  <div className="h-8 w-16 bg-zinc-900 rounded-lg animate-pulse"></div>
+                  <div className="h-3 w-28 bg-zinc-900/60 rounded animate-pulse"></div>
+                </div>
+              ))}
+            </div>
+
+            {/* Big Layout card skeleton */}
+            <div className="border border-zinc-850 bg-zinc-900/10 rounded-2xl p-6 space-y-6">
+              <div className="flex justify-between items-center pb-4 border-b border-zinc-850">
+                <div className="h-4.5 w-32 bg-zinc-900 rounded animate-pulse"></div>
+                <div className="h-8 w-24 bg-zinc-900 rounded-lg animate-pulse"></div>
+              </div>
+              <div className="space-y-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="flex justify-between items-center py-2.5">
+                    <div className="flex items-center gap-4">
+                      <div className="w-9 h-9 bg-zinc-900 rounded-lg animate-pulse"></div>
+                      <div className="space-y-2">
+                        <div className="h-3.5 w-36 bg-zinc-900 rounded animate-pulse"></div>
+                        <div className="h-2.5 w-24 bg-zinc-900/60 rounded animate-pulse"></div>
+                      </div>
+                    </div>
+                    <div className="h-3 w-16 bg-zinc-900 rounded animate-pulse"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

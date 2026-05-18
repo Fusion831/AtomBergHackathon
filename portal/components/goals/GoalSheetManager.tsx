@@ -222,7 +222,7 @@ export function GoalSheetManager({
             </div>
           )}
 
-          {!isHistorical && sheet.status === "LOCKED" && !planningPeriod && !sheet.unlockRequested && !showUnlockModal && (
+          {!isHistorical && sheet.status === "LOCKED" && !sheet.unlockRequested && !showUnlockModal && (
             <div className="mt-8 flex justify-end">
               <button
                 onClick={() => {

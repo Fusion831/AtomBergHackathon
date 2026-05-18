@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/authOptions";
 import { redirect } from "next/navigation";
 import { LogoutButton } from "@/components/auth/LogoutButton";
-import { Target } from "lucide-react";
+import { Sidebar } from "@/components/dashboard/Sidebar";
 import { prisma } from "@/lib/prisma";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
@@ -27,84 +27,73 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   const activeQuarter = activeCycle?.activeQuarter;
 
   return (
-    <div className="min-h-screen bg-black text-slate-50 flex flex-col font-sans selection:bg-blue-500/30">
-      <header className="border-b border-zinc-800/80 bg-zinc-950/80 px-6 py-3.5 sticky top-0 z-50 backdrop-blur-md shadow-sm">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-2.5">
-              <div className="p-1.5 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                <Target size={18} className="text-blue-400" />
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                <h1 className="text-lg font-semibold tracking-tight text-zinc-100">AtomQuest</h1>
-                <span className={`px-2 py-0.5 text-[10px] font-semibold tracking-wider rounded uppercase border ${
-                  activeQuarter 
-                    ? "bg-blue-500/10 text-blue-400 border-blue-500/20" 
-                    : "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                }`}>
-                  {activeQuarter ? `Active Phase: ${activeQuarter}` : "Phase: Goal Setting"}
-                </span>
-              </div>
-            </div>
-            <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-zinc-400">
-              {/* My Workspace Section */}
-              <div className="flex items-center gap-4 pr-5 border-r border-zinc-800/80">
-                <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider select-none bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800/60">My Workspace</span>
-                <a href="/goals/draft" className="hover:text-zinc-100 transition-colors">Goals</a>
-                <a href="/checkins" className="hover:text-zinc-100 transition-colors">Check-ins</a>
-                <a href="/reports" className="hover:text-zinc-100 transition-colors text-blue-400/90 hover:text-blue-400">Insights</a>
-              </div>
+    <div className="flex h-screen w-screen overflow-hidden bg-black text-slate-50 font-sans selection:bg-blue-500/30">
+      {/* Interactive Left Sidebar */}
+      <Sidebar 
+        user={session.user as any} 
+        activeQuarter={activeQuarter} 
+        planningQuarter={activeCycle?.planningQuarter} 
+      />
 
-              {/* Team Governance Section */}
-              {(session.user.role === "MANAGER" || session.user.role === "ADMIN") && (
-                <div className="flex items-center gap-4">
-                  <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider select-none bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800/60">Team Governance</span>
-                  <a href="/manager/review" className="hover:text-zinc-100 transition-colors">Reviews</a>
-                  <a href="/manager/checkins" className="hover:text-zinc-100 transition-colors">Check-ins</a>
-                  <a href="/manager/shared-goals" className="hover:text-zinc-100 transition-colors">Shared KPIs</a>
-                  <a href="/directory" className="hover:text-zinc-100 transition-colors">Directory</a>
-                  {session.user.role === "ADMIN" && (
-                    <a href="/admin/governance" className="hover:text-zinc-100 transition-colors text-amber-500/80 hover:text-amber-400 font-semibold">Admin Panel</a>
-                  )}
-                </div>
-              )}
-            </nav>
-          </div>
+      {/* Right Content Frame */}
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-black">
+        {/* Top Header Bar */}
+        <header className="border-b border-zinc-900 bg-zinc-950/80 px-6 py-4 flex items-center justify-between shrink-0 backdrop-blur-md">
           <div className="flex items-center gap-4">
-            <span className="text-sm text-zinc-400">{session.user.name} ({session.user.role})</span>
-            <LogoutButton />
+            <span className={`px-2 py-0.5 text-[10px] font-bold tracking-wider rounded uppercase border ${
+              activeQuarter 
+                ? "bg-blue-500/10 text-blue-400 border-blue-500/20" 
+                : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+            }`}>
+              {activeQuarter ? `Active Phase: ${activeQuarter}` : "Phase: Goal Setting"}
+            </span>
           </div>
-        </div>
-      </header>
-      {activeCycle && (activeQuarter || activeCycle.planningQuarter) && (
-        <div className="bg-zinc-950 border-b border-zinc-800/80 px-6 py-2">
-          <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 text-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-              {activeQuarter && (
-                <div className="flex items-center gap-1.5 text-blue-400">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-                  <span><strong>{activeQuarter} Performance Tracking</strong> is currently active.</span>
-                </div>
-              )}
-              {activeQuarter && activeCycle.planningQuarter && (
-                <span className="hidden sm:inline text-zinc-800">|</span>
-              )}
-              {activeCycle.planningQuarter && (
-                <div className="flex items-center gap-1.5 text-amber-400">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                  <span><strong>{activeCycle.planningQuarter} Goal Planning</strong> is now open.</span>
-                </div>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[9px] text-zinc-500 font-semibold tracking-wider bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 uppercase">Dual-Phase Overlap</span>
+
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:inline text-xs text-zinc-400 font-medium">
+              Welcome, <strong className="text-zinc-200">{session.user.name}</strong>
+            </span>
+            <div className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs font-bold text-blue-400 select-none">
+              {session.user.name?.split(" ").map(n => n[0]).join("")}
             </div>
           </div>
-        </div>
-      )}
-      <main className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-6 lg:p-8 space-y-6">
-        {children}
-      </main>
+        </header>
+
+        {/* Dual Phase Alert strip */}
+        {activeCycle && (activeQuarter || activeCycle.planningQuarter) && (
+          <div className="bg-zinc-950 border-b border-zinc-900 px-6 py-2 shrink-0">
+            <div className="flex flex-wrap items-center justify-between gap-4 text-[11px]">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                {activeQuarter && (
+                  <div className="flex items-center gap-1.5 text-blue-400">
+                    <span className="h-1 w-1 rounded-full bg-blue-500 animate-pulse"></span>
+                    <span><strong>{activeQuarter} Performance Tracking</strong> is active.</span>
+                  </div>
+                )}
+                {activeQuarter && activeCycle.planningQuarter && (
+                  <span className="hidden sm:inline text-zinc-800">|</span>
+                )}
+                {activeCycle.planningQuarter && (
+                  <div className="flex items-center gap-1.5 text-amber-400">
+                    <span className="h-1 w-1 rounded-full bg-amber-500 animate-pulse"></span>
+                    <span><strong>{activeCycle.planningQuarter} Goal Planning</strong> is open.</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[9px] text-zinc-500 font-semibold tracking-wider bg-zinc-900 px-2 py-0.5 border border-zinc-800/80 rounded uppercase">Dual-Phase Overlap</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Content Pane */}
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-zinc-950/20">
+          <div className="max-w-6xl mx-auto w-full">
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
