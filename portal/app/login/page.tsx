@@ -3,15 +3,24 @@ import { authOptions } from "@/lib/auth/authOptions";
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { Target } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 
 export default async function LoginPage() {
   const session = await getServerSession(authOptions);
   
   if (session?.user) {
-    if (session.user.role === "ADMIN") {
-      redirect("/admin/governance");
+    // Verify that the user exists in the database before auto-redirecting (fixes developer session caching loops)
+    const userExists = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { id: true }
+    });
+
+    if (userExists) {
+      if (session.user.role === "ADMIN") {
+        redirect("/admin/governance");
+      }
+      redirect("/goals/draft");
     }
-    redirect("/goals/draft");
   }
 
   return (

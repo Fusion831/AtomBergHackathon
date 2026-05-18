@@ -13,6 +13,16 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     redirect("/login");
   }
 
+  // Handle active session references to non-existent users (e.g., after database reseed)
+  const userExists = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true }
+  });
+
+  if (!userExists) {
+    redirect("/login");
+  }
+
   const activeCycle = await prisma.goalCycle.findFirst({ where: { isActive: true } });
   const activeQuarter = activeCycle?.activeQuarter;
 
