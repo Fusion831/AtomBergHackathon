@@ -4,8 +4,20 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/authOptions";
 import { revalidatePath } from "next/cache";
+import { UomType, MetricDirection, CheckInPeriod } from "@prisma/client";
 
-export async function createSharedGoal(data: any) {
+interface CreateSharedGoalInput {
+  title: string;
+  description: string;
+  thrustArea: string;
+  uomType: UomType;
+  metricDirection?: MetricDirection;
+  targetValue: number;
+  targetDate?: Date | null;
+  weightage?: number;
+}
+
+export async function createSharedGoal(data: CreateSharedGoalInput) {
   const session = await getServerSession(authOptions);
   if (!session || (session.user.role !== "MANAGER" && session.user.role !== "ADMIN")) {
     return { success: false, message: "Unauthorized" };
@@ -52,7 +64,7 @@ export async function createSharedGoal(data: any) {
   }
 }
 
-export async function assignSharedGoal(parentGoalId: string, employeeIds: string[], cycleId: string, quarter: any) {
+export async function assignSharedGoal(parentGoalId: string, employeeIds: string[], cycleId: string, quarter: CheckInPeriod) {
   const session = await getServerSession(authOptions);
   if (!session || (session.user.role !== "MANAGER" && session.user.role !== "ADMIN")) {
     return { success: false, message: "Unauthorized" };

@@ -5,12 +5,12 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/authOptions";
 import { revalidatePath } from "next/cache";
 import { calculateProgressScore, determineStatus } from "@/lib/progress";
-import { CheckInPeriod } from "@prisma/client";
+import { CheckInPeriod, GoalStatus } from "@prisma/client";
 
 export async function upsertCheckIn(
   goalId: string, 
   period: CheckInPeriod, 
-  data: { actualValue?: number; actualDate?: Date; employeeComment?: string; statusOverride?: any }
+  data: { actualValue?: number; actualDate?: Date; employeeComment?: string; statusOverride?: GoalStatus }
 ) {
   const session = await getServerSession(authOptions);
   if (!session) return { success: false, message: "Unauthorized" };
