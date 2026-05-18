@@ -14,7 +14,8 @@ import {
   LogOut, 
   Menu, 
   X,
-  User
+  User,
+  FileSpreadsheet
 } from "lucide-react";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import Link from "next/link";
@@ -35,24 +36,7 @@ export function Sidebar({ user, activeQuarter, planningQuarter }: SidebarProps) 
   const pathname = usePathname();
 
   const isActive = (path: string) => {
-    return pathname.startsWith(path);
-  };
-
-  const navItems = {
-    workspace: [
-      { label: "Quarter Plan", href: "/goals/draft", icon: FileText },
-      { label: "Performance Updates", href: "/checkins", icon: Activity },
-      { label: "Performance Insights", href: "/reports", icon: TrendingUp },
-    ],
-    governance: [
-      { label: "Manager Approvals", href: "/manager/review", icon: CheckCircle },
-      { label: "Team Performance Updates", href: "/manager/checkins", icon: Users },
-      { label: "Cascaded Team Goals", href: "/manager/shared-goals", icon: Target },
-    ],
-    admin: [
-      { label: "Operations Center", href: "/admin/governance", icon: Lock },
-      { label: "Directory", href: "/directory", icon: Compass },
-    ]
+    return pathname === path || (path !== "/" && pathname.startsWith(path));
   };
 
   const isManagerOrAdmin = user.role === "MANAGER" || user.role === "ADMIN";
@@ -93,50 +77,105 @@ export function Sidebar({ user, activeQuarter, planningQuarter }: SidebarProps) 
         {/* Workspace Section */}
         <div className="space-y-1.5">
           <div className="text-[10px] font-bold text-zinc-650 uppercase tracking-wider px-3 mb-2">My Work</div>
-          {navItems.workspace.map((item) => {
-            const Active = isActive(item.href);
-            const Icon = item.icon;
-            return (
-              <Link 
-                key={item.href} 
-                href={item.href}
-                onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                  Active 
-                    ? "bg-zinc-900 text-zinc-100 border border-zinc-800" 
-                    : "hover:bg-zinc-900/50 hover:text-zinc-200 border border-transparent"
-                }`}
-              >
-                <Icon size={16} className={Active ? "text-blue-400" : "text-zinc-500"} />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
+          
+          <Link 
+            href="/goals/draft"
+            onClick={() => setIsOpen(false)}
+            className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+              isActive("/goals/draft") 
+                ? "bg-zinc-900 text-zinc-100 border border-zinc-800" 
+                : "hover:bg-zinc-900/50 hover:text-zinc-200 border border-transparent"
+            }`}
+          >
+            <FileText size={16} className={isActive("/goals/draft") ? "text-blue-400" : "text-zinc-500"} />
+            <span>Quarter Plan</span>
+          </Link>
+
+          <Link 
+            href="/checkins"
+            onClick={() => setIsOpen(false)}
+            className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+              isActive("/checkins") 
+                ? "bg-zinc-900 text-zinc-100 border border-zinc-800" 
+                : "hover:bg-zinc-900/50 hover:text-zinc-200 border border-transparent"
+            }`}
+          >
+            <Activity size={16} className={isActive("/checkins") ? "text-blue-400" : "text-zinc-500"} />
+            <span>Performance Updates</span>
+          </Link>
+
+          <Link 
+            href="/reports?tab=insights"
+            onClick={() => setIsOpen(false)}
+            className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+              isActive("/reports") && !pathname.includes("tab=exports")
+                ? "bg-zinc-900 text-zinc-100 border border-zinc-800" 
+                : "hover:bg-zinc-900/50 hover:text-zinc-200 border border-transparent"
+            }`}
+          >
+            <TrendingUp size={16} className={isActive("/reports") && !pathname.includes("tab=exports") ? "text-blue-400" : "text-zinc-500"} />
+            <span>Performance Insights</span>
+          </Link>
+
+          {isManagerOrAdmin && (
+            <Link 
+              href="/reports?tab=exports"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                pathname.includes("tab=exports") 
+                  ? "bg-zinc-900 text-zinc-100 border border-zinc-800" 
+                  : "hover:bg-zinc-900/50 hover:text-zinc-200 border border-transparent"
+              }`}
+            >
+              <FileSpreadsheet size={16} className={pathname.includes("tab=exports") ? "text-blue-400" : "text-zinc-500"} />
+              <span>Corporate Reports</span>
+            </Link>
+          )}
         </div>
 
         {/* Team Governance Section */}
         {isManagerOrAdmin && (
           <div className="space-y-1.5 pt-4 border-t border-zinc-900">
             <div className="text-[10px] font-bold text-zinc-650 uppercase tracking-wider px-3 mb-2">Team Leadership</div>
-            {navItems.governance.map((item) => {
-              const Active = isActive(item.href);
-              const Icon = item.icon;
-              return (
-                <Link 
-                  key={item.href} 
-                  href={item.href}
-                  onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                    Active 
-                      ? "bg-zinc-900 text-zinc-100 border border-zinc-800" 
-                      : "hover:bg-zinc-900/50 hover:text-zinc-200 border border-transparent"
-                  }`}
-                >
-                  <Icon size={16} className={Active ? "text-blue-400" : "text-zinc-500"} />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
+            
+            <Link 
+              href="/manager/review"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                isActive("/manager/review") 
+                  ? "bg-zinc-900 text-zinc-100 border border-zinc-800" 
+                  : "hover:bg-zinc-900/50 hover:text-zinc-200 border border-transparent"
+              }`}
+            >
+              <CheckCircle size={16} className={isActive("/manager/review") ? "text-blue-400" : "text-zinc-500"} />
+              <span>Manager Approvals</span>
+            </Link>
+
+            <Link 
+              href="/manager/checkins"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                isActive("/manager/checkins") 
+                  ? "bg-zinc-900 text-zinc-100 border border-zinc-800" 
+                  : "hover:bg-zinc-900/50 hover:text-zinc-200 border border-transparent"
+              }`}
+            >
+              <Users size={16} className={isActive("/manager/checkins") ? "text-blue-400" : "text-zinc-500"} />
+              <span>Team Performance Updates</span>
+            </Link>
+
+            <Link 
+              href="/manager/shared-goals"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                isActive("/manager/shared-goals") 
+                  ? "bg-zinc-900 text-zinc-100 border border-zinc-800" 
+                  : "hover:bg-zinc-900/50 hover:text-zinc-200 border border-transparent"
+              }`}
+            >
+              <Target size={16} className={isActive("/manager/shared-goals") ? "text-blue-400" : "text-zinc-500"} />
+              <span>Cascaded Team Goals</span>
+            </Link>
           </div>
         )}
 
@@ -144,25 +183,32 @@ export function Sidebar({ user, activeQuarter, planningQuarter }: SidebarProps) 
         {isAdmin && (
           <div className="space-y-1.5 pt-4 border-t border-zinc-900">
             <div className="text-[10px] font-bold text-zinc-650 uppercase tracking-wider px-3 mb-2">Operations Control</div>
-            {navItems.admin.map((item) => {
-              const Active = isActive(item.href);
-              const Icon = item.icon;
-              return (
-                <Link 
-                  key={item.href} 
-                  href={item.href}
-                  onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                    Active 
-                      ? "bg-zinc-900 text-zinc-100 border border-zinc-800" 
-                      : "hover:bg-zinc-900/50 hover:text-zinc-200 border border-transparent text-amber-500/80 hover:text-amber-400"
-                  }`}
-                >
-                  <Icon size={16} className={Active ? "text-amber-400" : "text-zinc-500"} />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
+            
+            <Link 
+              href="/admin/governance"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                isActive("/admin/governance") 
+                  ? "bg-zinc-900 text-zinc-100 border border-zinc-800" 
+                  : "hover:bg-zinc-900/50 hover:text-zinc-200 border border-transparent"
+              }`}
+            >
+              <Lock size={16} className={isActive("/admin/governance") ? "text-amber-450" : "text-zinc-500"} />
+              <span>Operations Center</span>
+            </Link>
+
+            <Link 
+              href="/directory"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                isActive("/directory") 
+                  ? "bg-zinc-900 text-zinc-100 border border-zinc-800" 
+                  : "hover:bg-zinc-900/50 hover:text-zinc-200 border border-transparent"
+              }`}
+            >
+              <Compass size={16} className={isActive("/directory") ? "text-blue-400" : "text-zinc-500"} />
+              <span>Directory</span>
+            </Link>
           </div>
         )}
       </div>

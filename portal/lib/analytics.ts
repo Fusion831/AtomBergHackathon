@@ -64,7 +64,7 @@ export async function getAdminAnalytics(cycleId: string, quarter: CheckInPeriod)
   const draftCount = sheets.filter(s => s.status === "DRAFT").length;
 
   const overallCompletionRate = totalEmployees > 0 
-    ? Math.round((completedCount / totalEmployees) * 100) 
+    ? Math.min(Math.round((completedCount / totalEmployees) * 100), 100) 
     : 0;
 
   // 2. Department Completion Heatmap
@@ -93,7 +93,7 @@ export async function getAdminAnalytics(cycleId: string, quarter: CheckInPeriod)
       totalEmployees: totalDeptUsers,
       sheetsCount: dept.users.filter(u => u.goalSheets.length > 0).length,
       completedSheets: completedDeptSheets,
-      percentage: totalDeptUsers > 0 ? Math.round((completedDeptSheets / totalDeptUsers) * 100) : 0
+      percentage: totalDeptUsers > 0 ? Math.min(Math.round((completedDeptSheets / totalDeptUsers) * 100), 100) : 0
     };
   });
 
@@ -192,7 +192,7 @@ export async function getAdminAnalytics(cycleId: string, quarter: CheckInPeriod)
     }
 
     const checkInCompletionRate = teamSize > 0 
-      ? Math.round((approvedCount / teamSize) * 100) 
+      ? Math.min(Math.round((approvedCount / teamSize) * 100), 100) 
       : 100;
 
     return {
@@ -301,7 +301,7 @@ export async function getManagerAnalytics(managerId: string, cycleId: string, qu
   ).length;
 
   const teamCompletionRate = teamSize > 0 
-    ? Math.round((completedSheets / teamSize) * 100) 
+    ? Math.min(Math.round((completedSheets / teamSize) * 100), 100) 
     : 100;
 
   // Individual progress breakdown
