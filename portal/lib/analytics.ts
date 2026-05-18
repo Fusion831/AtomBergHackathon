@@ -423,6 +423,8 @@ export async function getManagerAnalytics(managerId: string, cycleId: string, qu
     });
   }
 
+  const personalExecution = await getEmployeeAnalytics(managerId, cycleId, quarter);
+
   return {
     teamSize,
     completedSheets,
@@ -431,7 +433,8 @@ export async function getManagerAnalytics(managerId: string, cycleId: string, qu
     teamCompletionRate,
     memberProgress,
     sharedKpis,
-    trends
+    trends,
+    personalExecution
   };
 }
 

@@ -8,11 +8,98 @@ const pool = new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-async function main() {
-  console.log("Starting Enterprise Demo Seeding...");
+const DEPT_GOALS = {
+  "Platform Engineering": {
+    Q1: [
+      { title: "Kubernetes Migration Phase 1", description: "Successfully migrate 60% of legacy core microservices to centralized EKS cluster.", thrustArea: "Infrastructure Security", uomType: "PERCENTAGE", targetValue: 60 },
+      { title: "Reduce Database Query Latency", description: "Optimize index coverage and slow query logs to reduce response times by 30%.", thrustArea: "Performance Optimization", uomType: "PERCENTAGE", targetValue: 30 }
+    ],
+    Q2: [
+      { title: "Scale Multi-Region Clusters", description: "Achieve warm standby secondary disaster recovery replication on Azure.", thrustArea: "Platform Uptime", uomType: "PERCENTAGE", targetValue: 100 },
+      { title: "Build Automated SRE Alerter", description: "Deliver real-time Grafana dashboard for automated outage alerts.", thrustArea: "Productivity Tooling", uomType: "PERCENTAGE", targetValue: 100 }
+    ],
+    Q3: [
+      { title: "Draft Security Tokenization Engine", description: "Propose end-to-end tokenization architecture for API secure payments.", thrustArea: "Security & Tech Debt", uomType: "PERCENTAGE", targetValue: 100 },
+      { title: "Migrate API Gateway", description: "Upgrade central ingress control to NextAuth v5 and Jose tokens.", thrustArea: "Platform Optimization", uomType: "PERCENTAGE", targetValue: 100 }
+    ]
+  },
+  "Product Management": {
+    Q1: [
+      { title: "Q1 UX Research & Wireframing", description: "Conduct user feedback loops on core widgets and refine mockups.", thrustArea: "User Engagement", uomType: "PERCENTAGE", targetValue: 100 },
+      { title: "Feature Adoption Analysis", description: "Implement Mixpanel tracking across new billing modules to monitor engagement.", thrustArea: "Product Metrics", uomType: "PERCENTAGE", targetValue: 100 }
+    ],
+    Q2: [
+      { title: "Launch Partner Integration Hub", description: "Deliver and launch unified integration hub with 3 top SaaS partners.", thrustArea: "Core Deliverables", uomType: "PERCENTAGE", targetValue: 100 },
+      { title: "Revamp Core User Onboarding", description: "Improve core feature click-through rate by 15% through a simplified user dashboard.", thrustArea: "User Experience", uomType: "PERCENTAGE", targetValue: 15 }
+    ],
+    Q3: [
+      { title: "Draft Mobile Web App Roadmap", description: "Submit wireframes and product requirement docs for the Q4 mobile initiative.", thrustArea: "Mobile Alignment", uomType: "PERCENTAGE", targetValue: 100 },
+      { title: "Launch Beta Feedback Loop", description: "Establish premium customer advisory board for beta feature testing.", thrustArea: "User Engagement", uomType: "PERCENTAGE", targetValue: 100 }
+    ]
+  },
+  "Customer Success": {
+    Q1: [
+      { title: "CSAT Improvement Plan", description: "Improve average account CSAT rating to 90% through proactive support.", thrustArea: "Customer Satisfaction", uomType: "PERCENTAGE", targetValue: 90 },
+      { title: "Premium Account QBRs", description: "Complete Q1 Quarterly Business Reviews for top 15 enterprise accounts.", thrustArea: "Engagement Metrics", uomType: "PERCENTAGE", targetValue: 100 }
+    ],
+    Q2: [
+      { title: "Reduce Churn in High-Tier Accounts", description: "Maintain churn rate below 2% by implementing proactive check-ins.", thrustArea: "Revenue Retention", uomType: "PERCENTAGE", targetValue: 2 },
+      { title: "Build Help Center V2", description: "Re-organize self-service knowledge base to decrease support ticket volume by 15%.", thrustArea: "Support Efficiency", uomType: "PERCENTAGE", targetValue: 15 }
+    ],
+    Q3: [
+      { title: "Customer Advocacy Program", description: "Sign up 5 enterprise accounts for public case studies and video testimonials.", thrustArea: "Brand Advocacy", uomType: "PERCENTAGE", targetValue: 100 },
+      { title: "Draft Customer Support SLAs", description: "Establish high-fidelity support response time targets for Q4 cycles.", thrustArea: "Operational Efficiency", uomType: "PERCENTAGE", targetValue: 100 }
+    ]
+  },
+  "Finance Operations": {
+    Q1: [
+      { title: "Ledger Audit Integration", description: "Successfully integrate cloud expense reporting into centralized billing ledger.", thrustArea: "Accounting Compliance", uomType: "PERCENTAGE", targetValue: 100 },
+      { title: "Expense Reconciliation Audit", description: "Reduce end-of-month reconciliation turnaround duration to under 3 days.", thrustArea: "Process Efficiency", uomType: "PERCENTAGE", targetValue: 100 }
+    ],
+    Q2: [
+      { title: "AP/AR Automated Billing Dashboard", description: "Migrate 90% of legacy accounts to custom automated billing dashboard.", thrustArea: "Operational Efficiency", uomType: "PERCENTAGE", targetValue: 90 },
+      { title: "Tax Compliance Reporting", description: "Submit audited reports for regional tax structures with zero warnings.", thrustArea: "Regulatory Risk", uomType: "PERCENTAGE", targetValue: 100 }
+    ],
+    Q3: [
+      { title: "Capital Expenditure Modeling", description: "Submit Q4 CapEx forecast to the executive board.", thrustArea: "Financial Planning", uomType: "PERCENTAGE", targetValue: 100 },
+      { title: "Draft Vendor Payments V2", description: "Refactor automated ACH payments processor system rules.", thrustArea: "Systems Architecture", uomType: "PERCENTAGE", targetValue: 100 }
+    ]
+  },
+  "Data & Analytics": {
+    Q1: [
+      { title: "Snowflake Warehouse Optimization", description: "Decrease warehouse queries latency by 30% through clustering optimization.", thrustArea: "Infrastructure Performance", uomType: "PERCENTAGE", targetValue: 30 },
+      { title: "BI Performance Dashboard", description: "Deliver unified company executive BI dashboard with real-time analytics updates.", thrustArea: "Business Intelligence", uomType: "PERCENTAGE", targetValue: 100 }
+    ],
+    Q2: [
+      { title: "Predictive Churn ML Model Tuning", description: "Build customer churn model yielding predictive accuracy of 90% or higher.", thrustArea: "Data Science Products", uomType: "PERCENTAGE", targetValue: 90 },
+      { title: "Kafka Real-Time Pipelines", description: "Migrate core ledger analytics ingestion pipeline to event-driven Kafka stream.", thrustArea: "Pipeline Engineering", uomType: "PERCENTAGE", targetValue: 100 }
+    ],
+    Q3: [
+      { title: "Draft Unified Customer Lakehouse", description: "Submit architecture design for Delta Lake integrations.", thrustArea: "Strategic Analytics", uomType: "PERCENTAGE", targetValue: 100 },
+      { title: "Implement Anomaly Alerting", description: "Develop automated detection scripts for core telemetry logs.", thrustArea: "Operational Excellence", uomType: "PERCENTAGE", targetValue: 100 }
+    ]
+  },
+  "Human Resources": {
+    Q1: [
+      { title: "Talent Acquisition Redesign", description: "Scale recruitment channels to reduce Average Time-to-Hire to under 25 days.", thrustArea: "Hiring Efficiency", uomType: "PERCENTAGE", targetValue: 100 },
+      { title: "Leadership Development Program", description: "Enroll and certify 85% of department managers in regional executive coaching.", thrustArea: "Manager Enablement", uomType: "PERCENTAGE", targetValue: 85 }
+    ],
+    Q2: [
+      { title: "Employee Retention Initiatives", description: "Develop high-fidelity feedback loops to maintain voluntary annual turnover below 5%.", thrustArea: "Retention Metrics", uomType: "PERCENTAGE", targetValue: 5 },
+      { title: "Annual Review Cycle Prep", description: "Draft standard competency frameworks and performance guidelines.", thrustArea: "Career Frameworks", uomType: "PERCENTAGE", targetValue: 100 }
+    ],
+    Q3: [
+      { title: "Draft Talent Management Portal", description: "Propose functional specifications for self-service internal mobility tools.", thrustArea: "Internal Mobility", uomType: "PERCENTAGE", targetValue: 100 },
+      { title: "Redesign Workspace Benefits", description: "Align medical and wellness packages with remote-first standard structures.", thrustArea: "Compensation Plans", uomType: "PERCENTAGE", targetValue: 100 }
+    ]
+  }
+};
 
-  // 1. Sanitize/Clean database to prevent duplicate and orphaned records
-  console.log("Cleaning existing database tables...");
+async function main() {
+  console.log("Starting Enterprise High-Fidelity Seeding...");
+
+  // 1. Clear database
+  console.log("Cleaning database...");
   await prisma.auditLog.deleteMany();
   await prisma.checkIn.deleteMany();
   await prisma.goal.deleteMany();
@@ -21,807 +108,294 @@ async function main() {
   await prisma.user.deleteMany();
   await prisma.department.deleteMany();
 
-  // 2. Hash default credentials
   const commonPassword = await bcrypt.hash("password", 10);
 
-  // 3. Seed Departments (Hierarchical structure)
-  console.log("Seeding hierarchical departments...");
-  const engineering = await prisma.department.create({
-    data: {
-      name: "Platform Engineering",
-      description: "Core infrastructure, cloud deployments, systems security, and SRE tooling."
-    }
-  });
+  // 2. Departments
+  console.log("Seeding departments...");
+  const depts = {};
+  const deptList = [
+    { name: "Platform Engineering", desc: "Core infrastructure, cloud deployments, systems security, and SRE tooling." },
+    { name: "Product Management", desc: "UX design, product integrations, roadmap scheduling, and growth initiatives." },
+    { name: "Customer Success", desc: "Enterprise account relations, CSAT audits, training, and tier support." },
+    { name: "Finance Operations", desc: "Corporate billing, ledger audits, compliance policies, and AP/AR." },
+    { name: "Data & Analytics", desc: "Data warehousing, BI reporting, pipeline engineering, and predictive models." },
+    { name: "Human Resources", desc: "Talent acquisition, leadership training, and employee experience." }
+  ];
 
-  const product = await prisma.department.create({
-    data: {
-      name: "Product Management",
-      description: "UX design, product integrations, roadmap scheduling, and growth initiatives."
-    }
-  });
+  for (const d of deptList) {
+    const dept = await prisma.department.create({
+      data: { name: d.name, description: d.desc }
+    });
+    depts[d.name] = dept;
+  }
 
-  const success = await prisma.department.create({
-    data: {
-      name: "Customer Success",
-      description: "Enterprise account relations, CSAT audits, training, and tier support."
-    }
-  });
-
-  const finance = await prisma.department.create({
-    data: {
-      name: "Finance Operations",
-      description: "Corporate billing, ledger audits, compliance policies, and AP/AR."
-    }
-  });
-
-  const dataAnalytics = await prisma.department.create({
-    data: {
-      name: "Data & Analytics",
-      description: "Data warehousing, BI reporting, pipeline engineering, and predictive models."
-    }
-  });
-
-  const hr = await prisma.department.create({
-    data: {
-      name: "Human Resources",
-      description: "Talent acquisition, leadership training, and employee experience."
-    }
-  });
-
-  // 4. Seed Admins
-  console.log("Seeding Administrative users...");
+  // 3. Admin & HR Advisor
   const admin = await prisma.user.create({
-    data: {
-      empId: "EMP-001",
-      email: "admin@test.com",
-      passwordHash: commonPassword,
-      name: "System Admin",
-      role: "ADMIN",
-      departmentId: engineering.id
-    }
+    data: { empId: "EMP-001", email: "admin@test.com", passwordHash: commonPassword, name: "System Admin", role: "ADMIN", departmentId: depts["Platform Engineering"].id }
   });
 
   const sarah = await prisma.user.create({
-    data: {
-      empId: "EMP-002",
-      email: "sarah.chen@test.com",
-      passwordHash: commonPassword,
-      name: "Sarah Chen",
-      role: "ADMIN",
-      departmentId: hr.id,
-      managerId: admin.id
-    }
+    data: { empId: "EMP-002", email: "sarah.chen@test.com", passwordHash: commonPassword, name: "Sarah Chen", role: "ADMIN", departmentId: depts["Human Resources"].id, managerId: admin.id }
   });
 
-  // 5. Seed Managers
-  console.log("Seeding Department Managers...");
-  const engManager = await prisma.user.create({
-    data: {
-      empId: "EMP-003",
-      email: "manager@test.com",
-      passwordHash: commonPassword,
-      name: "Engineering Manager",
-      role: "MANAGER",
-      departmentId: engineering.id,
-      managerId: admin.id
-    }
-  });
+  // 4. Managers
+  const managers = [
+    { empId: "EMP-003", email: "manager@test.com", name: "Engineering Manager", role: "MANAGER", deptName: "Platform Engineering" },
+    { empId: "EMP-004", email: "rahul.verma@test.com", name: "Rahul Verma", role: "MANAGER", deptName: "Product Management" },
+    { empId: "EMP-005", email: "priya.nair@test.com", name: "Priya Nair", role: "MANAGER", deptName: "Customer Success" },
+    { empId: "EMP-006", email: "michael.torres@test.com", name: "Michael Torres", role: "MANAGER", deptName: "Finance Operations" },
+    { empId: "EMP-007", email: "aditi.rao@test.com", name: "Aditi Rao", role: "MANAGER", deptName: "Data & Analytics" }
+  ];
 
-  const prodManager = await prisma.user.create({
-    data: {
-      empId: "EMP-004",
-      email: "rahul.verma@test.com",
-      passwordHash: commonPassword,
-      name: "Rahul Verma",
-      role: "MANAGER",
-      departmentId: product.id,
-      managerId: admin.id
-    }
-  });
+  const managerRecords = {};
+  for (const m of managers) {
+    const rec = await prisma.user.create({
+      data: { empId: m.empId, email: m.email, passwordHash: commonPassword, name: m.name, role: m.role, departmentId: depts[m.deptName].id, managerId: admin.id }
+    });
+    managerRecords[m.deptName] = rec;
+  }
 
-  const csManager = await prisma.user.create({
-    data: {
-      empId: "EMP-005",
-      email: "priya.nair@test.com",
-      passwordHash: commonPassword,
-      name: "Priya Nair",
-      role: "MANAGER",
-      departmentId: success.id,
-      managerId: admin.id
-    }
-  });
+  // 5. Employees
+  const employees = [
+    { empId: "EMP-101", email: "employee@test.com", name: "Alex Rivera", role: "EMPLOYEE", deptName: "Platform Engineering", manager: managerRecords["Platform Engineering"] },
+    { empId: "EMP-102", email: "david.kim@test.com", name: "David Kim", role: "EMPLOYEE", deptName: "Platform Engineering", manager: managerRecords["Platform Engineering"] },
+    { empId: "EMP-103", email: "elena.rostova@test.com", name: "Elena Rostova", role: "EMPLOYEE", deptName: "Platform Engineering", manager: managerRecords["Platform Engineering"] },
+    { empId: "EMP-104", email: "marcus.vance@test.com", name: "Marcus Vance", role: "EMPLOYEE", deptName: "Platform Engineering", manager: managerRecords["Platform Engineering"] },
+    { empId: "EMP-201", email: "sophie.dubois@test.com", name: "Sophie Dubois", role: "EMPLOYEE", deptName: "Product Management", manager: managerRecords["Product Management"] },
+    { empId: "EMP-202", email: "james.wilson@test.com", name: "James Wilson", role: "EMPLOYEE", deptName: "Product Management", manager: managerRecords["Product Management"] },
+    { empId: "EMP-301", email: "samira.begum@test.com", name: "Samira Begum", role: "EMPLOYEE", deptName: "Customer Success", manager: managerRecords["Customer Success"] },
+    { empId: "EMP-302", email: "carlos.mendez@test.com", name: "Carlos Mendez", role: "EMPLOYEE", deptName: "Customer Success", manager: managerRecords["Customer Success"] },
+    { empId: "EMP-303", email: "olivia.wild@test.com", name: "Olivia Wild", role: "EMPLOYEE", deptName: "Customer Success", manager: managerRecords["Customer Success"] },
+    { empId: "EMP-401", email: "daniel.craig@test.com", name: "Daniel Craig", role: "EMPLOYEE", deptName: "Finance Operations", manager: managerRecords["Finance Operations"] },
+    { empId: "EMP-501", email: "kenji.sato@test.com", name: "Kenji Sato", role: "EMPLOYEE", deptName: "Data & Analytics", manager: managerRecords["Data & Analytics"] }
+  ];
 
-  const finManager = await prisma.user.create({
-    data: {
-      empId: "EMP-006",
-      email: "michael.torres@test.com",
-      passwordHash: commonPassword,
-      name: "Michael Torres",
-      role: "MANAGER",
-      departmentId: finance.id,
-      managerId: admin.id
-    }
-  });
+  const employeeRecords = [];
+  for (const e of employees) {
+    const rec = await prisma.user.create({
+      data: { empId: e.empId, email: e.email, passwordHash: commonPassword, name: e.name, role: e.role, departmentId: depts[e.deptName].id, managerId: e.manager.id }
+    });
+    employeeRecords.push({ record: rec, deptName: e.deptName });
+  }
 
-  const dataManager = await prisma.user.create({
-    data: {
-      empId: "EMP-007",
-      email: "aditi.rao@test.com",
-      passwordHash: commonPassword,
-      name: "Aditi Rao",
-      role: "MANAGER",
-      departmentId: dataAnalytics.id,
-      managerId: admin.id
-    }
-  });
-
-  // 6. Seed Employees
-  console.log("Seeding Employees across departments...");
-  const empEng1 = await prisma.user.create({
-    data: {
-      empId: "EMP-101",
-      email: "employee@test.com",
-      passwordHash: commonPassword,
-      name: "Alex Rivera",
-      role: "EMPLOYEE",
-      departmentId: engineering.id,
-      managerId: engManager.id
-    }
-  });
-
-  const empEng2 = await prisma.user.create({
-    data: {
-      empId: "EMP-102",
-      email: "david.kim@test.com",
-      passwordHash: commonPassword,
-      name: "David Kim",
-      role: "EMPLOYEE",
-      departmentId: engineering.id,
-      managerId: engManager.id
-    }
-  });
-
-  const empEng3 = await prisma.user.create({
-    data: {
-      empId: "EMP-103",
-      email: "elena.rostova@test.com",
-      passwordHash: commonPassword,
-      name: "Elena Rostova",
-      role: "EMPLOYEE",
-      departmentId: engineering.id,
-      managerId: engManager.id
-    }
-  });
-
-  const empEng4 = await prisma.user.create({
-    data: {
-      empId: "EMP-104",
-      email: "marcus.vance@test.com",
-      passwordHash: commonPassword,
-      name: "Marcus Vance",
-      role: "EMPLOYEE",
-      departmentId: engineering.id,
-      managerId: engManager.id
-    }
-  });
-
-  const empProd1 = await prisma.user.create({
-    data: {
-      empId: "EMP-201",
-      email: "sophie.dubois@test.com",
-      passwordHash: commonPassword,
-      name: "Sophie Dubois",
-      role: "EMPLOYEE",
-      departmentId: product.id,
-      managerId: prodManager.id
-    }
-  });
-
-  const empProd2 = await prisma.user.create({
-    data: {
-      empId: "EMP-202",
-      email: "james.wilson@test.com",
-      passwordHash: commonPassword,
-      name: "James Wilson",
-      role: "EMPLOYEE",
-      departmentId: product.id,
-      managerId: prodManager.id
-    }
-  });
-
-  const empCS1 = await prisma.user.create({
-    data: {
-      empId: "EMP-301",
-      email: "samira.begum@test.com",
-      passwordHash: commonPassword,
-      name: "Samira Begum",
-      role: "EMPLOYEE",
-      departmentId: success.id,
-      managerId: csManager.id
-    }
-  });
-
-  const empCS2 = await prisma.user.create({
-    data: {
-      empId: "EMP-302",
-      email: "carlos.mendez@test.com",
-      passwordHash: commonPassword,
-      name: "Carlos Mendez",
-      role: "EMPLOYEE",
-      departmentId: success.id,
-      managerId: csManager.id
-    }
-  });
-
-  const empCS3 = await prisma.user.create({
-    data: {
-      empId: "EMP-303",
-      email: "olivia.wild@test.com",
-      passwordHash: commonPassword,
-      name: "Olivia Wild",
-      role: "EMPLOYEE",
-      departmentId: success.id,
-      managerId: csManager.id
-    }
-  });
-
-  const empFin1 = await prisma.user.create({
-    data: {
-      empId: "EMP-401",
-      email: "daniel.craig@test.com",
-      passwordHash: commonPassword,
-      name: "Daniel Craig",
-      role: "EMPLOYEE",
-      departmentId: finance.id,
-      managerId: finManager.id
-    }
-  });
-
-  const empData1 = await prisma.user.create({
-    data: {
-      empId: "EMP-501",
-      email: "kenji.sato@test.com",
-      passwordHash: commonPassword,
-      name: "Kenji Sato",
-      role: "EMPLOYEE",
-      departmentId: dataAnalytics.id,
-      managerId: dataManager.id
-    }
-  });
-
-  // 7. Seed Goal Cycles
-  console.log("Seeding performance Goal Cycle (FY2026 - Q2 active, Q3 planning)...");
+  // 6. Goal Cycle
   const cycle = await prisma.goalCycle.create({
     data: {
       name: "FY2026 Goal Cycle",
       startDate: new Date("2026-04-01T00:00:00Z"),
       endDate: new Date("2027-03-31T23:59:59Z"),
       isActive: true,
-      activeQuarter: "Q2", 
-      planningQuarter: "Q3" 
+      activeQuarter: "Q2",
+      planningQuarter: "Q3"
     }
   });
 
-  // 8. Seed Goal Sheets & Goals for Q2 (Performance Tracking) and Q3 (Planning)
-  console.log("Seeding Quarter-Aware Goal Sheets...");
+  // 7. Seed Q1, Q2, and Q3 sheets for all managers and employees
+  const allParticipants = [
+    { record: sarah, deptName: "Human Resources", isManager: true },
+    ...Object.values(managerRecords).map(m => ({ record: m, deptName: Object.keys(managerRecords).find(k => managerRecords[k].id === m.id), isManager: true })),
+    ...employeeRecords.map(e => ({ record: e.record, deptName: e.deptName, isManager: false }))
+  ];
 
-  // --- A. Alex Rivera (employee@test.com) ---
-  // Locked Q2 Sheet (Operational)
-  const sheetAlexQ2 = await prisma.goalSheet.create({
-    data: { userId: empEng1.id, cycleId: cycle.id, quarter: "Q2", status: "LOCKED" }
-  });
-
-  // Draft Q3 Sheet (Planning)
-  const sheetAlexQ3 = await prisma.goalSheet.create({
-    data: { userId: empEng1.id, cycleId: cycle.id, quarter: "Q3", status: "DRAFT" }
-  });
-
-  // --- B. Engineering Manager ---
+  // We explicitly create a Master Shared Goal for Q2 (Platform Stability Initiative)
+  const platformEngManager = managerRecords["Platform Engineering"];
   const sheetEngManagerQ2 = await prisma.goalSheet.create({
-    data: { userId: engManager.id, cycleId: cycle.id, quarter: "Q2", status: "LOCKED" }
-  });
-  const sheetEngManagerQ3 = await prisma.goalSheet.create({
-    data: { userId: engManager.id, cycleId: cycle.id, quarter: "Q3", status: "DRAFT" }
+    data: { userId: platformEngManager.id, cycleId: cycle.id, quarter: "Q2", status: "LOCKED" }
   });
 
-  // Master shared goal for Q2
   const masterUptimeGoal = await prisma.goal.create({
     data: {
       sheetId: sheetEngManagerQ2.id,
-      ownerId: engManager.id,
-      departmentId: engineering.id,
+      ownerId: platformEngManager.id,
+      departmentId: depts["Platform Engineering"].id,
       title: "Platform Stability Initiative",
       description: "Maintain 99.99% overall platform uptime by implementing multi-region failover structures.",
       thrustArea: "Platform Uptime",
       uomType: "PERCENTAGE",
       targetValue: 99.99,
-      weightage: 40,
+      weightage: 50,
       status: "ON_TRACK",
       goalType: "SHARED"
     }
   });
 
-  // Alex Rivera Q2 goals
-  const alexGoal1 = await prisma.goal.create({
-    data: {
-      sheetId: sheetAlexQ2.id,
-      ownerId: empEng1.id,
-      departmentId: engineering.id,
-      title: "Reduce API Latency",
-      description: "Optimize middleware and database indices to reduce response times by 20%.",
-      thrustArea: "Performance Optimization",
-      uomType: "PERCENTAGE",
-      targetValue: 20,
-      weightage: 40,
-      status: "ON_TRACK",
-      goalType: "INDIVIDUAL"
+  console.log(`Seeding Q1, Q2, Q3 data for all ${allParticipants.length} enterprise participants...`);
+  for (const part of allParticipants) {
+    const user = part.record;
+    const dept = depts[part.deptName];
+    const goalsDef = DEPT_GOALS[part.deptName] || DEPT_GOALS["Platform Engineering"];
+
+    // ---------------- Q1 LOCKED (Archived History) ----------------
+    // Skip creating another Q2 sheet for platformEngManager since it's already explicitly created
+    const sheetQ1 = await prisma.goalSheet.create({
+      data: { userId: user.id, cycleId: cycle.id, quarter: "Q1", status: "LOCKED", approvedAt: new Date("2026-06-30T17:00:00Z"), lockedAt: new Date("2026-06-30T17:05:00Z") }
+    });
+
+    for (let i = 0; i < goalsDef.Q1.length; i++) {
+      const gDef = goalsDef.Q1[i];
+      const weight = i === 0 ? 60 : 40;
+      const goal = await prisma.goal.create({
+        data: {
+          sheetId: sheetQ1.id,
+          ownerId: user.id,
+          departmentId: dept.id,
+          title: gDef.title,
+          description: gDef.description,
+          thrustArea: gDef.thrustArea,
+          uomType: gDef.uomType,
+          targetValue: gDef.targetValue,
+          weightage: weight,
+          status: "COMPLETED",
+          goalType: "INDIVIDUAL",
+          currentProgress: 100
+        }
+      });
+
+      // Complete Q1 check-in
+      await prisma.checkIn.create({
+        data: {
+          goalId: goal.id,
+          period: "Q1",
+          actualValue: gDef.targetValue,
+          actualDate: new Date("2026-06-15T12:00:00Z"),
+          progressScore: 100,
+          status: "COMPLETED",
+          employeeComment: `Q1 operational sprint deliverables fully completed for: ${gDef.title}. Verified core thresholds.`,
+          managerComment: `Excellent execution and highly stable rollout. Metric validated and approved.`
+        }
+      });
     }
-  });
 
-  const alexGoal2 = await prisma.goal.create({
-    data: {
-      sheetId: sheetAlexQ2.id,
-      ownerId: empEng1.id,
-      departmentId: engineering.id,
-      title: "Build SRE Alerts Dashboard",
-      description: "Deliver real-time Grafana dashboard for automated outage alerts.",
-      thrustArea: "Productivity Tooling",
-      uomType: "PERCENTAGE",
-      targetValue: 100,
-      weightage: 30,
-      status: "COMPLETED",
-      goalType: "INDIVIDUAL"
+    // ---------------- Q2 LOCKED (Active Execution) ----------------
+    let sheetQ2 = null;
+    if (user.id === platformEngManager.id) {
+      sheetQ2 = sheetEngManagerQ2;
+    } else {
+      sheetQ2 = await prisma.goalSheet.create({
+        data: { userId: user.id, cycleId: cycle.id, quarter: "Q2", status: "LOCKED", approvedAt: new Date("2026-09-30T17:00:00Z"), lockedAt: new Date("2026-09-30T17:05:00Z") }
+      });
     }
-  });
 
-  const alexGoal3 = await prisma.goal.create({
-    data: {
-      sheetId: sheetAlexQ2.id,
-      ownerId: empEng1.id,
-      departmentId: engineering.id,
-      title: "Platform Stability Initiative",
-      description: "Maintain 99.99% overall platform uptime by implementing multi-region failover structures.",
-      thrustArea: "Platform Uptime",
-      uomType: "PERCENTAGE",
-      targetValue: 99.99,
-      weightage: 30,
-      status: "ON_TRACK",
-      goalType: "SHARED",
-      parentGoalId: masterUptimeGoal.id
+    // Custom flow for Elena (Unlock requested)
+    if (user.email === "elena.rostova@test.com") {
+      await prisma.goalSheet.update({
+        where: { id: sheetQ2.id },
+        data: {
+          unlockRequested: true,
+          unlockReason: "Our AWS budget cap shifted mid-quarter. I need to restate Q2 resource optimization targets."
+        }
+      });
     }
-  });
 
-  // Alex Rivera Q3 goals (Planning)
-  await prisma.goal.create({
-    data: {
-      sheetId: sheetAlexQ3.id,
-      ownerId: empEng1.id,
-      departmentId: engineering.id,
-      title: "Migrate Auth to NextAuth v5",
-      description: "Upgrade system authentication to use standard Jose and NextAuth v5 middleware.",
-      thrustArea: "Security & Tech Debt",
-      uomType: "PERCENTAGE",
-      targetValue: 100,
-      weightage: 50,
-      status: "NOT_STARTED",
-      goalType: "INDIVIDUAL"
+    for (let i = 0; i < goalsDef.Q2.length; i++) {
+      const gDef = goalsDef.Q2[i];
+      const weight = i === 0 ? 50 : 50;
+
+      // Check if we can cascade master stability goal to Platform Engineering direct reports
+      const isSharedCascade = part.deptName === "Platform Engineering" && !part.isManager && i === 0;
+
+      const goal = await prisma.goal.create({
+        data: {
+          sheetId: sheetQ2.id,
+          ownerId: user.id,
+          departmentId: dept.id,
+          title: isSharedCascade ? "Platform Stability Initiative" : gDef.title,
+          description: isSharedCascade ? "Maintain 99.99% overall platform uptime by implementing multi-region failover structures." : gDef.description,
+          thrustArea: isSharedCascade ? "Platform Uptime" : gDef.thrustArea,
+          uomType: gDef.uomType,
+          targetValue: isSharedCascade ? 99.99 : gDef.targetValue,
+          weightage: weight,
+          status: "ON_TRACK",
+          goalType: isSharedCascade ? "SHARED" : "INDIVIDUAL",
+          parentGoalId: isSharedCascade ? masterUptimeGoal.id : null
+        }
+      });
+
+      // Partial check-in details for Q1 and Q2
+      const q1Score = i === 0 ? 60 : 40;
+      const q2Score = i === 0 ? 90 : 80;
+
+      // Q1 check-in (earlier progress)
+      await prisma.checkIn.create({
+        data: {
+          goalId: goal.id,
+          period: "Q1",
+          actualValue: isSharedCascade ? 99.95 : (gDef.targetValue * (q1Score / 100)),
+          actualDate: new Date("2026-06-12T10:00:00Z"),
+          progressScore: q1Score,
+          status: "ON_TRACK",
+          employeeComment: "Initial telemetry hooks and pipelines verified. On track for targeted delivery.",
+          managerComment: "Good initial milestone alignment."
+        }
+      });
+
+      // Q2 check-in (current active progress)
+      await prisma.checkIn.create({
+        data: {
+          goalId: goal.id,
+          period: "Q2",
+          actualValue: isSharedCascade ? 99.98 : (gDef.targetValue * (q2Score / 100)),
+          actualDate: new Date("2026-09-15T14:30:00Z"),
+          progressScore: q2Score,
+          status: "ON_TRACK",
+          employeeComment: "System architecture optimized, metrics verified under high stress conditions.",
+          managerComment: "Valid performance. Approved for phase close."
+        }
+      });
+
+      await prisma.goal.update({
+        where: { id: goal.id },
+        data: { currentProgress: q2Score, status: "ON_TRACK" }
+      });
     }
-  });
 
-  await prisma.goal.create({
-    data: {
-      sheetId: sheetAlexQ3.id,
-      ownerId: empEng1.id,
-      departmentId: engineering.id,
-      title: "Optimise NextJS Server Action Bundles",
-      description: "Reduce hydration and server bundle size by 15%.",
-      thrustArea: "Performance Optimization",
-      uomType: "PERCENTAGE",
-      targetValue: 15,
-      weightage: 50,
-      status: "NOT_STARTED",
-      goalType: "INDIVIDUAL"
+    // ---------------- Q3 PLANNING (Draft/Submitted/Under Review) ----------------
+    let statusQ3 = "DRAFT";
+    let submittedAt = null;
+
+    if (user.email === "sophie.dubois@test.com") {
+      statusQ3 = "SUBMITTED";
+      submittedAt = new Date("2026-05-10T12:00:00Z");
+    } else if (user.email === "samira.begum@test.com") {
+      statusQ3 = "UNDER_REVIEW";
+      submittedAt = new Date("2026-05-12T14:30:00Z");
     }
-  });
 
-  // Seed Alex Rivera Q1 & Q2 Check-ins for Q2 Goals
-  const checkAlex1Q1 = await prisma.checkIn.create({
-    data: {
-      goalId: alexGoal1.id,
-      period: "Q1",
-      actualValue: 12,
-      actualDate: new Date("2026-06-15T12:00:00Z"),
-      progressScore: 60,
-      status: "ON_TRACK",
-      employeeComment: "Core API middleware refactored. Latency dropped by 12%. On path for target.",
-      managerComment: "Excellent initial middleware improvements. Focus on index coverage next."
+    const sheetQ3 = await prisma.goalSheet.create({
+      data: { userId: user.id, cycleId: cycle.id, quarter: "Q3", status: statusQ3, submittedAt }
+    });
+
+    for (let i = 0; i < goalsDef.Q3.length; i++) {
+      const gDef = goalsDef.Q3[i];
+      const weight = i === 0 ? 50 : 50;
+
+      await prisma.goal.create({
+        data: {
+          sheetId: sheetQ3.id,
+          ownerId: user.id,
+          departmentId: dept.id,
+          title: gDef.title,
+          description: gDef.description,
+          thrustArea: gDef.thrustArea,
+          uomType: gDef.uomType,
+          targetValue: gDef.targetValue,
+          weightage: weight,
+          status: "NOT_STARTED",
+          goalType: "INDIVIDUAL"
+        }
+      });
     }
-  });
+  }
 
-  const checkAlex1Q2 = await prisma.checkIn.create({
-    data: {
-      goalId: alexGoal1.id,
-      period: "Q2",
-      actualValue: 18,
-      actualDate: new Date("2026-09-18T10:30:00Z"),
-      progressScore: 90,
-      status: "ON_TRACK",
-      employeeComment: "Database queries indexed, current latency reduction is at 18%.",
-      managerComment: "Awesome caching work, latency numbers validated and verified."
-    }
-  });
-
-  await prisma.goal.update({ where: { id: alexGoal1.id }, data: { currentProgress: 90 } });
-
-  await prisma.checkIn.create({
-    data: {
-      goalId: alexGoal2.id,
-      period: "Q1",
-      actualValue: 50,
-      actualDate: new Date("2026-06-12T14:00:00Z"),
-      progressScore: 50,
-      status: "ON_TRACK",
-      employeeComment: "Backend skeletons for SRE metrics ingested successfully. Frontend mockups finalized.",
-      managerComment: "Solid progress on mockups."
-    }
-  });
-
-  await prisma.checkIn.create({
-    data: {
-      goalId: alexGoal2.id,
-      period: "Q2",
-      actualValue: 100,
-      actualDate: new Date("2026-09-15T11:00:00Z"),
-      progressScore: 100,
-      status: "COMPLETED",
-      employeeComment: "Fully shipped the live SRE alerting dashboard.",
-      managerComment: "Exceptional delivery! This significantly improves response times."
-    }
-  });
-
-  await prisma.goal.update({ where: { id: alexGoal2.id }, data: { currentProgress: 100 } });
-
-  await prisma.checkIn.create({
-    data: {
-      goalId: alexGoal3.id,
-      period: "Q1",
-      actualValue: 99.95,
-      actualDate: new Date("2026-06-20T09:00:00Z"),
-      progressScore: 80,
-      status: "ON_TRACK",
-      employeeComment: "99.95% uptime maintained.",
-      managerComment: "Terrific job keeping the system highly responsive."
-    }
-  });
-
-  await prisma.checkIn.create({
-    data: {
-      goalId: alexGoal3.id,
-      period: "Q2",
-      actualValue: 99.98,
-      actualDate: new Date("2026-09-20T09:00:00Z"),
-      progressScore: 95,
-      status: "ON_TRACK",
-      employeeComment: "Highly stable second quarter.",
-      managerComment: "Excellent results. Regional failover times were well within tolerance."
-    }
-  });
-
-  await prisma.goal.update({ where: { id: alexGoal3.id }, data: { currentProgress: 95 } });
-
-
-  // --- C. David Kim (david.kim@test.com) ---
-  const sheetDavidQ2 = await prisma.goalSheet.create({
-    data: { userId: empEng2.id, cycleId: cycle.id, quarter: "Q2", status: "LOCKED" }
-  });
-  const sheetDavidQ3 = await prisma.goalSheet.create({
-    data: { userId: empEng2.id, cycleId: cycle.id, quarter: "Q3", status: "DRAFT" }
-  });
-
-  const davidGoal1 = await prisma.goal.create({
-    data: {
-      sheetId: sheetDavidQ2.id,
-      ownerId: empEng2.id,
-      departmentId: engineering.id,
-      title: "CI/CD Pipeline Speed Optimization",
-      description: "Decrease build and deployment pipelines durations below 10 minutes.",
-      thrustArea: "SRE Productivity",
-      uomType: "NUMERIC",
-      targetValue: 10,
-      weightage: 50,
-      status: "ON_TRACK",
-      goalType: "INDIVIDUAL"
-    }
-  });
-
-  const davidGoal2 = await prisma.goal.create({
-    data: {
-      sheetId: sheetDavidQ2.id,
-      ownerId: empEng2.id,
-      departmentId: engineering.id,
-      title: "Platform Stability Initiative",
-      description: "Maintain 99.99% overall platform uptime by implementing multi-region failover structures.",
-      thrustArea: "Platform Uptime",
-      uomType: "PERCENTAGE",
-      targetValue: 99.99,
-      weightage: 50,
-      status: "ON_TRACK",
-      goalType: "SHARED",
-      parentGoalId: masterUptimeGoal.id
-    }
-  });
-
-  await prisma.checkIn.create({
-    data: {
-      goalId: davidGoal1.id,
-      period: "Q1",
-      actualValue: 18,
-      actualDate: new Date("2026-06-10T10:00:00Z"),
-      progressScore: 40,
-      status: "ON_TRACK",
-      employeeComment: "Integrated runner caching.",
-      managerComment: "Great start."
-    }
-  });
-
-  await prisma.checkIn.create({
-    data: {
-      goalId: davidGoal1.id,
-      period: "Q2",
-      actualValue: 11,
-      actualDate: new Date("2026-09-11T10:00:00Z"),
-      progressScore: 90,
-      status: "ON_TRACK",
-      employeeComment: "Multi-stage builds automated.",
-      managerComment: "Extremely close to the 10-minute threshold."
-    }
-  });
-  await prisma.goal.update({ where: { id: davidGoal1.id }, data: { currentProgress: 90 } });
-
-
-  // --- D. Kenji Sato (kenji.sato@test.com) ---
-  const sheetKenjiQ2 = await prisma.goalSheet.create({
-    data: { userId: empData1.id, cycleId: cycle.id, quarter: "Q2", status: "LOCKED" }
-  });
-  const sheetKenjiQ3 = await prisma.goalSheet.create({
-    data: { userId: empData1.id, cycleId: cycle.id, quarter: "Q3", status: "DRAFT" }
-  });
-
-  const kenjiGoal1 = await prisma.goal.create({
-    data: {
-      sheetId: sheetKenjiQ2.id,
-      ownerId: empData1.id,
-      departmentId: dataAnalytics.id,
-      title: "Predictive Churn ML Model",
-      description: "Build customer churn model yielding predictive accuracy of 90% or higher.",
-      thrustArea: "Data Science Products",
-      uomType: "PERCENTAGE",
-      targetValue: 90,
-      weightage: 60,
-      status: "ON_TRACK",
-      goalType: "INDIVIDUAL"
-    }
-  });
-
-  const kenjiGoal2 = await prisma.goal.create({
-    data: {
-      sheetId: sheetKenjiQ2.id,
-      ownerId: empData1.id,
-      departmentId: dataAnalytics.id,
-      title: "Snowflake Pipeline Optimization",
-      description: "Decrease warehouse queries latency by 30% through clustering optimization.",
-      thrustArea: "Infrastructure Performance",
-      uomType: "PERCENTAGE",
-      targetValue: 30,
-      weightage: 40,
-      status: "COMPLETED",
-      goalType: "INDIVIDUAL"
-    }
-  });
-
-  await prisma.checkIn.create({
-    data: {
-      goalId: kenjiGoal1.id,
-      period: "Q1",
-      actualValue: 80,
-      actualDate: new Date("2026-06-18T10:00:00Z"),
-      progressScore: 75,
-      status: "ON_TRACK",
-      employeeComment: "Random Forest baseline model completed.",
-      managerComment: "Solid baseline."
-    }
-  });
-  await prisma.checkIn.create({
-    data: {
-      goalId: kenjiGoal1.id,
-      period: "Q2",
-      actualValue: 88,
-      actualDate: new Date("2026-09-18T10:00:00Z"),
-      progressScore: 95,
-      status: "ON_TRACK",
-      employeeComment: "Tuned hyperparameters using XGBoost.",
-      managerComment: "Excellent optimization loop."
-    }
-  });
-  await prisma.goal.update({ where: { id: kenjiGoal1.id }, data: { currentProgress: 95 } });
-
-
-  // --- E. Sophie Dubois (empProd1) - Submitted Q3 Planning ---
-  const sheetSophieQ2 = await prisma.goalSheet.create({
-    data: { userId: empProd1.id, cycleId: cycle.id, quarter: "Q2", status: "LOCKED" }
-  });
-
-  const sheetSophieQ3 = await prisma.goalSheet.create({
-    data: {
-      userId: empProd1.id,
-      cycleId: cycle.id,
-      quarter: "Q3",
-      status: "SUBMITTED",
-      submittedAt: new Date("2026-05-10T12:00:00Z")
-    }
-  });
-
-  await prisma.goal.create({
-    data: {
-      sheetId: sheetSophieQ3.id,
-      ownerId: empProd1.id,
-      departmentId: product.id,
-      title: "Product UX Engagement Lift",
-      description: "Improve core feature click-through rate by 15% through a simplified user dashboard.",
-      thrustArea: "User Engagement",
-      uomType: "PERCENTAGE",
-      targetValue: 15,
-      weightage: 50,
-      status: "NOT_STARTED",
-      goalType: "INDIVIDUAL"
-    }
-  });
-
-  await prisma.goal.create({
-    data: {
-      sheetId: sheetSophieQ3.id,
-      ownerId: empProd1.id,
-      departmentId: product.id,
-      title: "Launch Integration Partner Module",
-      description: "Deliver and launch unified integration hub with 3 top SaaS partners.",
-      thrustArea: "Core Deliverables",
-      uomType: "PERCENTAGE",
-      targetValue: 100,
-      weightage: 50,
-      status: "NOT_STARTED",
-      goalType: "INDIVIDUAL"
-    }
-  });
-
-
-  // --- F. Samira Begum (empCS1) - Q3 Under Review ---
-  const sheetSamiraQ2 = await prisma.goalSheet.create({
-    data: { userId: empCS1.id, cycleId: cycle.id, quarter: "Q2", status: "LOCKED" }
-  });
-
-  const sheetSamiraQ3 = await prisma.goalSheet.create({
-    data: {
-      userId: empCS1.id,
-      cycleId: cycle.id,
-      quarter: "Q3",
-      status: "UNDER_REVIEW",
-      submittedAt: new Date("2026-05-12T14:30:00Z")
-    }
-  });
-
-  await prisma.goal.create({
-    data: {
-      sheetId: sheetSamiraQ3.id,
-      ownerId: empCS1.id,
-      departmentId: success.id,
-      title: "Enterprise CSAT Elevation",
-      description: "Elevate overall CSAT rating to 95% across premium support accounts.",
-      thrustArea: "Customer Satisfaction",
-      uomType: "PERCENTAGE",
-      targetValue: 95,
-      weightage: 40,
-      status: "NOT_STARTED",
-      goalType: "INDIVIDUAL"
-    }
-  });
-
-
-  // --- G. Daniel Craig (empFin1) - Q3 in Draft ---
-  const sheetDanielQ2 = await prisma.goalSheet.create({
-    data: { userId: empFin1.id, cycleId: cycle.id, quarter: "Q2", status: "LOCKED" }
-  });
-
-  const sheetDanielQ3 = await prisma.goalSheet.create({
-    data: {
-      userId: empFin1.id,
-      cycleId: cycle.id,
-      quarter: "Q3",
-      status: "DRAFT"
-    }
-  });
-
-  await prisma.goal.create({
-    data: {
-      sheetId: sheetDanielQ3.id,
-      ownerId: empFin1.id,
-      departmentId: finance.id,
-      title: "AP/AR Automated Invoicing Migration",
-      description: "Migrate 90% of legacy accounts to custom automated billing dashboard.",
-      thrustArea: "Operational Efficiency",
-      uomType: "PERCENTAGE",
-      targetValue: 90,
-      weightage: 50,
-      status: "NOT_STARTED",
-      goalType: "INDIVIDUAL"
-    }
-  });
-
-
-  // --- H. Elena Rostova (empEng3) - Locked Q2 sheet with UNLOCK REQUESTED ---
-  const sheetElenaQ2 = await prisma.goalSheet.create({
-    data: {
-      userId: empEng3.id,
-      cycleId: cycle.id,
-      quarter: "Q2",
-      status: "LOCKED",
-      unlockRequested: true,
-      unlockReason: "Our AWS budget cap shifted mid-quarter. I need to restate Q2 resource optimization targets."
-    }
-  });
-
-  // Draft Q3 Sheet (Planning)
-  const sheetElenaQ3 = await prisma.goalSheet.create({
-    data: {
-      userId: empEng3.id,
-      cycleId: cycle.id,
-      quarter: "Q3",
-      status: "DRAFT"
-    }
-  });
-
-  await prisma.goal.create({
-    data: {
-      sheetId: sheetElenaQ2.id,
-      ownerId: empEng3.id,
-      departmentId: engineering.id,
-      title: "Deploy Multi-Cloud Backup Clusters",
-      description: "Achieve warm standby secondary disaster recovery replication on Azure.",
-      thrustArea: "Disaster Recovery",
-      uomType: "PERCENTAGE",
-      targetValue: 100,
-      weightage: 50,
-      status: "ON_TRACK",
-      goalType: "INDIVIDUAL"
-    }
-  });
-
-  await prisma.goal.create({
-    data: {
-      sheetId: sheetElenaQ2.id,
-      ownerId: empEng3.id,
-      departmentId: engineering.id,
-      title: "Optimise K8s Resource Requests",
-      description: "Achieve 20% cluster infrastructure savings by rightsizing node allocations.",
-      thrustArea: "Cost Optimization",
-      uomType: "PERCENTAGE",
-      targetValue: 20,
-      weightage: 50,
-      status: "ON_TRACK",
-      goalType: "INDIVIDUAL"
-    }
-  });
-
-
-  // 9. Seed System Audit Logs for Governance Feed
-  console.log("Seeding chronologically consistent Governance Audit Logs...");
-
+  // 8. Seed Cron Audit Logs
+  console.log("Seeding chronologically consistent Audit Logs...");
   await prisma.auditLog.create({
     data: {
       actorId: admin.id,
       action: "CREATE_CYCLE",
       entityType: "GoalCycle",
       entityId: cycle.id,
-      newValues: { name: "FY2026 Goal Cycle", startDate: "2026-04-01T00:00:00Z", endDate: "2027-03-31T23:59:59Z" },
+      newValues: { name: "FY2026 Goal Cycle", startDate: "2026-04-01" },
       createdAt: new Date("2026-04-02T09:00:00Z")
     }
   });
@@ -837,62 +411,7 @@ async function main() {
     }
   });
 
-  await prisma.auditLog.create({
-    data: {
-      actorId: admin.id,
-      action: "SET_ACTIVE_QUARTER",
-      entityType: "GoalCycle",
-      entityId: cycle.id,
-      newValues: { activeQuarter: "Q2" },
-      createdAt: new Date("2026-04-02T09:10:00Z")
-    }
-  });
-
-  await prisma.auditLog.create({
-    data: {
-      actorId: admin.id,
-      action: "SET_PLANNING_QUARTER",
-      entityType: "GoalCycle",
-      entityId: cycle.id,
-      newValues: { planningQuarter: "Q3" },
-      createdAt: new Date("2026-04-02T09:12:00Z")
-    }
-  });
-
-  await prisma.auditLog.create({
-    data: {
-      actorId: empEng1.id,
-      action: "SUBMIT_SHEET",
-      entityType: "GoalSheet",
-      entityId: sheetAlexQ2.id,
-      newValues: { status: "SUBMITTED", quarter: "Q2" },
-      createdAt: new Date("2026-04-10T10:00:00Z")
-    }
-  });
-
-  await prisma.auditLog.create({
-    data: {
-      actorId: engManager.id,
-      action: "APPROVE_SHEET",
-      entityType: "GoalSheet",
-      entityId: sheetAlexQ2.id,
-      newValues: { status: "LOCKED", quarter: "Q2" },
-      createdAt: new Date("2026-04-12T14:00:00Z")
-    }
-  });
-
-  await prisma.auditLog.create({
-    data: {
-      actorId: empEng3.id,
-      action: "REQUEST_UNLOCK",
-      entityType: "GoalSheet",
-      entityId: sheetElenaQ2.id,
-      newValues: { reason: "AWS budget capping requires target weight adjustment.", quarter: "Q2" },
-      createdAt: new Date("2026-07-02T10:00:00Z")
-    }
-  });
-
-  console.log("Database seeded successfully with high-fidelity corporate dataset.");
+  console.log("Database seeded successfully with premium enterprise dataset.");
 }
 
 main()

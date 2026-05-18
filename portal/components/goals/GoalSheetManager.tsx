@@ -63,27 +63,103 @@ export function GoalSheetManager({
     });
   };
 
+  const isHistorical = sheet.quarter !== activePeriod && sheet.quarter !== planningPeriod;
+
+  // Calculate historical performance score
+  let historicalScore = 0;
+  if (isHistorical && sheet.goals.length > 0) {
+    let totalWeightedScore = 0;
+    let totalWeightage = 0;
+    
+    sheet.goals.forEach(goal => {
+      const checkIn = goal.checkIns?.find((c: any) => c.period === sheet.quarter);
+      const score = checkIn 
+        ? (checkIn.progressScore ?? 0) 
+        : (goal.status === "COMPLETED" ? 100 : (goal.status === "ON_TRACK" ? 75 : 0));
+        
+      totalWeightedScore += score * goal.weightage;
+      totalWeightage += goal.weightage;
+    });
+    
+    historicalScore = totalWeightage > 0 
+      ? Math.round(totalWeightedScore / totalWeightage) 
+      : 0;
+  }
+
   if (sheet.status !== "DRAFT") {
     return (
       <div className="space-y-6">
-        <WeightageProgress current={currentWeightage} />
+        {isHistorical ? (
+          <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden shadow-xl animate-in fade-in-50 duration-300">
+            {/* Ambient Background Gradient */}
+            <div className="absolute top-0 right-0 w-[180px] h-[180px] bg-blue-500/5 rounded-full blur-[80px] pointer-events-none"></div>
+            
+            <div className="space-y-2 relative z-10">
+              <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-bold uppercase rounded tracking-wider">
+                Q1 Historical Cycle Locked
+              </span>
+              <h3 className="text-xl font-bold text-zinc-100 tracking-tight">Performance Summary</h3>
+              <p className="text-xs text-zinc-400 max-w-md">
+                This goal sheet represents locked historical operational data. Progress updates and achievements have been finalized by audit log consensus.
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-4 shrink-0 relative z-10">
+              <div className="text-right">
+                <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">Final Execution Score</span>
+                <p className="text-3xl font-extrabold text-blue-400 font-mono tracking-tight">{historicalScore}%</p>
+              </div>
+              <div className="h-12 w-[1px] bg-zinc-800"></div>
+              <div>
+                <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">Status</span>
+                <div className="mt-1 px-2.5 py-0.5 bg-zinc-800 text-zinc-400 border border-zinc-700/60 text-xs font-semibold rounded uppercase tracking-wider">
+                  Archived
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <WeightageProgress current={currentWeightage} />
+        )}
 
-        <div className="flex items-center justify-between p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl">
-          <span className="text-sm font-medium text-zinc-300">
-            Goal Sheet Quarter: <strong className="text-emerald-400">{sheet.quarter}</strong>
-          </span>
-          <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded uppercase tracking-wider">{sheet.status}</span>
-        </div>
+        {!isHistorical && (
+          <div className="flex items-center justify-between p-4 rounded-xl border bg-emerald-500/5 border-emerald-500/10">
+            <span className="text-sm font-medium text-zinc-300">
+              Goal Sheet Quarter: <strong className="text-emerald-400">{sheet.quarter}</strong>
+            </span>
+            <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded uppercase tracking-wider">
+              {sheet.status}
+            </span>
+          </div>
+        )}
 
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-medium text-zinc-100">Your Goals ({sheet.goals.length})</h2>
-            {sheet.status === "LOCKED" && !activePeriod && (
+            {sheet.status === "LOCKED" && !activePeriod && !isHistorical && (
               <span className="text-xs font-medium bg-zinc-800 text-zinc-400 px-3 py-1 rounded-full border border-zinc-700">Check-in Window Closed</span>
+            )}
+            {isHistorical && (
+              <span className="text-xs font-medium bg-zinc-900/50 text-zinc-500 px-3 py-1 rounded-full border border-zinc-800/80">Archived Record</span>
             )}
           </div>
           <div className="flex flex-col gap-3">
             {sheet.goals.map((goal) => {
+              // Historical goals render Q1 check-ins read-only
+              if (isHistorical) {
+                return (
+                  <div key={goal.id} className="relative">
+                    {goal.goalType === "SHARED" && (
+                      <div className="absolute -top-3 right-4 z-20">
+                        <span className="px-2 py-0.5 bg-blue-500 text-white text-[10px] uppercase tracking-wider font-semibold rounded shadow-sm">Shared KPI</span>
+                      </div>
+                    )}
+                    <CheckInCard goal={goal} activePeriod={sheet.quarter} readOnly={true} />
+                  </div>
+                );
+              }
+
+              // Active goals render Q2 check-ins editably
               if (sheet.status === "LOCKED" && activePeriod) {
                 return (
                   <div key={goal.id} className="relative">
@@ -127,7 +203,7 @@ export function GoalSheetManager({
             )})}
           </div>
           
-          {sheet.status === "LOCKED" && planningPeriod && sheet.quarter !== planningPeriod && !sheet.unlockRequested && !showUnlockModal && (
+          {!isHistorical && sheet.status === "LOCKED" && planningPeriod && sheet.quarter !== planningPeriod && !sheet.unlockRequested && !showUnlockModal && (
             <div className="mt-8 p-5 bg-amber-500/5 border border-amber-500/20 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <h4 className="text-amber-400 font-semibold flex items-center gap-1.5 text-sm">
@@ -138,7 +214,7 @@ export function GoalSheetManager({
                 </p>
               </div>
               <Link
-                href="/goals/draft"
+                href="/goals/draft?tab=planning"
                 className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-md transition-colors font-semibold text-xs shrink-0 shadow-md"
               >
                 Go to Planning Workspace &rarr;
@@ -146,7 +222,7 @@ export function GoalSheetManager({
             </div>
           )}
 
-          {sheet.status === "LOCKED" && !planningPeriod && !sheet.unlockRequested && !showUnlockModal && (
+          {!isHistorical && sheet.status === "LOCKED" && !planningPeriod && !sheet.unlockRequested && !showUnlockModal && (
             <div className="mt-8 flex justify-end">
               <button
                 onClick={() => {

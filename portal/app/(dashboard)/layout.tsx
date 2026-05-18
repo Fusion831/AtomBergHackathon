@@ -46,25 +46,27 @@ export default async function DashboardLayout({ children }: { children: ReactNod
                 </span>
               </div>
             </div>
-            <nav className="hidden md:flex items-center gap-5 text-sm font-medium text-zinc-400">
-              {session.user.role === "EMPLOYEE" && (
-                <>
-                  <a href="/goals/draft" className="hover:text-zinc-100 transition-colors">My Goals</a>
-                  <a href="/checkins" className="hover:text-zinc-100 transition-colors">Check-ins</a>
-                  <a href="/reports" className="hover:text-zinc-100 transition-colors text-blue-400/90 hover:text-blue-400">Insights</a>
-                </>
-              )}
+            <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-zinc-400">
+              {/* My Workspace Section */}
+              <div className="flex items-center gap-4 pr-5 border-r border-zinc-800/80">
+                <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider select-none bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800/60">My Workspace</span>
+                <a href="/goals/draft" className="hover:text-zinc-100 transition-colors">Goals</a>
+                <a href="/checkins" className="hover:text-zinc-100 transition-colors">Check-ins</a>
+                <a href="/reports" className="hover:text-zinc-100 transition-colors text-blue-400/90 hover:text-blue-400">Insights</a>
+              </div>
+
+              {/* Team Governance Section */}
               {(session.user.role === "MANAGER" || session.user.role === "ADMIN") && (
-                <>
-                  <a href="/manager/review" className="hover:text-zinc-100 transition-colors">Team Reviews</a>
-                  <a href="/manager/checkins" className="hover:text-zinc-100 transition-colors">Team Check-ins</a>
+                <div className="flex items-center gap-4">
+                  <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider select-none bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800/60">Team Governance</span>
+                  <a href="/manager/review" className="hover:text-zinc-100 transition-colors">Reviews</a>
+                  <a href="/manager/checkins" className="hover:text-zinc-100 transition-colors">Check-ins</a>
                   <a href="/manager/shared-goals" className="hover:text-zinc-100 transition-colors">Shared KPIs</a>
                   <a href="/directory" className="hover:text-zinc-100 transition-colors">Directory</a>
-                  <a href="/reports" className="hover:text-zinc-100 transition-colors text-blue-400/90 hover:text-blue-400">Analytics & Reports</a>
-                </>
-              )}
-              {session.user.role === "ADMIN" && (
-                <a href="/admin/governance" className="hover:text-zinc-100 transition-colors text-amber-500/80 hover:text-amber-400">Admin</a>
+                  {session.user.role === "ADMIN" && (
+                    <a href="/admin/governance" className="hover:text-zinc-100 transition-colors text-amber-500/80 hover:text-amber-400 font-semibold">Admin Panel</a>
+                  )}
+                </div>
               )}
             </nav>
           </div>
