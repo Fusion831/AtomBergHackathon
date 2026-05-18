@@ -99,7 +99,7 @@ export default async function ManagerReviewDetailPage({ params }: { params: Prom
           <div className="p-4 bg-zinc-950/20 border border-zinc-900 rounded-xl flex items-start gap-3">
             <Lock className="text-zinc-650 shrink-0 mt-0.5" size={16} />
             <div>
-              <h4 className="text-zinc-400 font-bold text-xs">Quarter Plan Finalized & Locked</h4>
+              <h4 className="text-zinc-400 font-bold text-xs">Quarter Plan Plan Locked</h4>
               <p className="text-[11px] text-zinc-550 mt-1 leading-relaxed">This sheet has been approved and is locked. To modify targets mid-cycle, please submit an unlock recommendation below.</p>
             </div>
           </div>

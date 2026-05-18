@@ -168,7 +168,7 @@ export default async function AdminGovernancePage({
             Operations Center
           </h1>
           <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
-            Monitor cycle transitions, authorise plan overrides, and audit organisational consensus events.
+            Monitor cycle transitions, authorize plan updates, and audit organisational consensus events.
           </p>
         </div>
         {activeCycle && (
@@ -201,7 +201,7 @@ export default async function AdminGovernancePage({
                 : "border-transparent text-zinc-500 hover:text-zinc-300"
             }`}
           >
-            {tab === "overview" ? "Cycle Operations & Overrides" : "Consensus & Workflow Audit Trail"}
+            {tab === "overview" ? "Cycle Operations & Unlocks" : "Consensus & Workflow Audit Trail"}
           </Link>
         ))}
       </div>
@@ -305,7 +305,7 @@ export default async function AdminGovernancePage({
               <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
-                    <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Quarter Plan Overrides</h2>
+                    <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Quarter Plan Unlock Requests</h2>
                     <p className="text-[11px] text-zinc-500 mt-0.5">Review justifications, authorise unlocks, and manage locked plan states.</p>
                   </div>
                   {/* Quarter toggle */}
@@ -331,7 +331,7 @@ export default async function AdminGovernancePage({
                   <div className="space-y-3">
                     <h3 className="text-[10px] font-extrabold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                       <ShieldAlert size={12} className="animate-pulse" />
-                      SLA Priority Overrides ({unlockRequests.length})
+                      Priority Unlock Requests ({unlockRequests.length})
                     </h3>
                     <div className="bg-zinc-950/30 border border-amber-500/15 rounded-2xl divide-y divide-zinc-900/50">
                       {unlockRequests.map((sheet) => (
@@ -461,7 +461,7 @@ export default async function AdminGovernancePage({
         <div className="space-y-4">
           <div>
             <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Workflow Audit Logs</h2>
-            <p className="text-[11px] text-zinc-500 mt-1">Consensus log of proposals, approvals, overrides, and unlocks.</p>
+            <p className="text-[11px] text-zinc-500 mt-1">Consensus log of proposals, approvals, updates, and unlocks.</p>
           </div>
           <div className="bg-zinc-900/40 border border-zinc-900 rounded-2xl overflow-hidden shadow-xl">
             <div className="overflow-x-auto">

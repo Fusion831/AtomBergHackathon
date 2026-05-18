@@ -57,9 +57,9 @@ const STATUS_CONFIG: Record<
     icon: CheckCircle,
   },
   LOCKED: {
-    label: "Finalized & Locked",
+    label: "Plan Locked",
     description:
-      "This Quarter Plan is finalized. Updates can only be logged during check-in windows, and plan alterations require administrative unlock permission.",
+      "Your plan for the quarter is locked. You can update your progress, but changing goals requires an unlock request.",
     bgClass: "bg-zinc-500/5",
     textClass: "text-zinc-400",
     borderClass: "border-zinc-800",
@@ -121,9 +121,9 @@ export default async function DraftGoalsPage(props: PageProps) {
   // Dynamic workspace copy
   const workspace = {
     active: {
-      title: `${getQuarterLabel(activeQuarter)} Active Performance`,
+      title: `${getQuarterLabel(activeQuarter)} Current Quarter Progress`,
       subtext:
-        "Track current quarter execution, log performance updates against operational key results, and view real-time comments.",
+        "Track your goals for the current quarter, update your progress, and review ongoing feedback.",
     },
     planning: {
       title: `${getQuarterLabel(planningQuarter ?? "Q3")} Goal Planning`,
@@ -170,7 +170,7 @@ export default async function DraftGoalsPage(props: PageProps) {
           }`}
         >
           <Target size={14} className={selectedTab === "active" ? "text-emerald-400" : "text-zinc-600"} />
-          {getQuarterLabel(activeQuarter)} Active Performance
+          {getQuarterLabel(activeQuarter)} Current Quarter Progress
           <span
             className={`px-1.5 py-0.5 text-[9px] rounded font-bold uppercase border ${
               selectedTab === "active"
@@ -239,7 +239,7 @@ export default async function DraftGoalsPage(props: PageProps) {
                 {getQuarterLabel(activeQuarter)} Performance Tracking Active
               </span>
               <p className="text-xs text-zinc-400">
-                Employees may submit check-ins, log weekly progress increments, and request target overrides.
+                Update your progress weekly and submit unlock requests if targets need to change.
               </p>
             </div>
           </div>

@@ -42,8 +42,8 @@ export default async function ReportsPage({
     return (
       <div className="max-w-4xl mx-auto py-12 px-4 text-center select-none">
         <AlertTriangle size={48} className="text-amber-500 mx-auto mb-4 animate-pulse" />
-        <h2 className="text-sm font-bold text-zinc-300">No Active Performance Cycle</h2>
-        <p className="text-xs text-zinc-550 mt-2">Please contact an operations administrator to activate an active performance cycle.</p>
+        <h2 className="text-sm font-bold text-zinc-300">No Current Quarter Progress Cycle</h2>
+        <p className="text-xs text-zinc-550 mt-2">Please contact an operations administrator to activate an Current Quarter Progress cycle.</p>
       </div>
     );
   }

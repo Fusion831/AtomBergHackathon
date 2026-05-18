@@ -241,7 +241,7 @@ export function GoalSheetManager({
                   <Calendar size={14} /> Goal Planning Window Open for {planningPeriod}
                 </h4>
                 <p className="text-[11px] text-zinc-400 mt-1 max-w-xl leading-relaxed">
-                  Please use your separate Goal Planning tab to draft goals for the upcoming quarter, keeping this active performance plan locked for performance updates.
+                  Please use your separate Goal Planning tab to draft goals for the upcoming quarter, keeping this Current Quarter Progress plan locked for performance updates.
                 </p>
               </div>
               <Link
