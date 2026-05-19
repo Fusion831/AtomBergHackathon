@@ -10,10 +10,10 @@
     "lint": "eslint",
     "db:generate": "prisma generate",
     "db:migrate": "prisma db push",
-    "seed:dev": "tsx prisma/seed-dev.ts",
-    "seed:demo": "tsx prisma/seed-demo.ts",
-    "reset:dev": "prisma db push --force-reset && tsx prisma/seed-dev.ts",
-    "reset:demo": "prisma db push --force-reset && tsx prisma/seed-demo.ts"
+    "seed:dev": "tsx -r dotenv/config prisma/seed-dev.ts",
+    "seed:demo": "tsx -r dotenv/config prisma/seed-demo.ts",
+    "reset:dev": "prisma db push --force-reset && tsx -r dotenv/config prisma/seed-dev.ts",
+    "reset:demo": "prisma db push --force-reset && tsx -r dotenv/config prisma/seed-demo.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
